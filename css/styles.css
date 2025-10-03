@@ -258,6 +258,9 @@ body {
 .tab{display:flex;flex-direction:column;align-items:center;gap:.25rem;padding:.4rem .75rem;border-radius:10px;border:0;background:transparent;color:#32544B}
 .tab.is-active{background:var(--brand-50);color:var(--brand)}
 .tab .i{width:20px;height:20px}
+/* PNG icons in tab bar */
+.tab-ico{width:26px;height:26px;object-fit:contain;display:block;filter:brightness(.9);}
+.tab.is-active .tab-ico{filter:none}
 
 /* ---------- TOAST ---------- */
 .toast{
@@ -309,6 +312,8 @@ body {
   .row.m-card [role="cell"]{display:none}
   .m-lines{display:flex;flex-direction:column;gap:.55rem}
   .m-line{display:flex;flex-wrap:wrap;align-items:center;gap:.9rem;font-size:.95rem;line-height:1.25}
+  .m-line.m-contact{gap:2rem;flex-wrap:wrap;}
+  .m-contact .m-phone,.m-contact .m-person{display:inline-flex;align-items:center;gap:.4rem}
   /* mobile line icons */
   .m-line .m-ico{width:18px;height:18px;object-fit:contain;display:inline-block;vertical-align:middle;margin-right:2px;filter:brightness(.9)}
   .m-line-top .m-ico{position:relative;top:-1px}

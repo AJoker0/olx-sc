@@ -17,6 +17,9 @@ const ASSETS = [
   './assets/house.png',
   './assets/ring.png',
   './assets/person.png',
+  './assets/tools.png',
+  './assets/ahalay.png',
+  './assets/docum.png',
   './manifest.webmanifest'
 ];
 

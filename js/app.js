@@ -174,10 +174,11 @@ function renderTicketsPage({ title, statusFilter, showNewButton }){
             <span class="m-tag"><img class="m-ico" src="assets/settings.png" alt=""/> ${tk.type}</span>
           </div>
           <div class="m-line m-address"><img class="m-ico" src="assets/house.png" alt=""/> ${tk.address || '—'}</div>
-          <div class="m-line m-phone"><img class="m-ico" src="assets/ring.png" alt=""/> <a class="link" href="tel:${tk.phone.replace(/\s+/g,'')}">${tk.phone || '—'}</a></div>
-          <div class="m-line m-person"><img class="m-ico" src="assets/person.png" alt=""/> ${tk.person || '—'}</div>
+          <div class="m-line m-contact">
+            <span class="m-phone"><img class="m-ico" src="assets/ring.png" alt=""/> <a class="link" href="tel:${tk.phone.replace(/\s+/g,'')}">${tk.phone || '—'}</a></span>
+            <span class="m-person"><img class="m-ico" src="assets/person.png" alt=""/> ${tk.person || '—'}</span>
+          </div>
       `;
-      // insert lines before actions container
       const actionsCell = row.querySelector('.row__actions');
       row.insertBefore(lines, actionsCell);
     }
