@@ -37,7 +37,7 @@ body {
 /* ---------- LAYOUT ---------- */
 .shell{padding:1.25rem}
 .topbar{position:sticky;top:0;z-index:6;background:var(--panel);box-shadow:var(--shadow);padding:.9rem 1.25rem}
-.topbar h1{font-size:1.1rem;margin:0;color:var(--muted);letter-spacing:.2px}
+.topbar h1{font-size:1.1rem;margin:0;color:#0D0D0D;letter-spacing:.2px}
 
 /* Desktop: даём место под фиксированный сайдбар */
 @media (min-width: 881px){
@@ -48,7 +48,7 @@ body {
 /* ---------- SIDEBAR ---------- */
 .sidebar{position:fixed;left:0;top:0;bottom:0;width:260px;background:#389D75;color:#fff;display:flex;flex-direction:column}
 .logo{font-weight:800;font-size:1.2rem;letter-spacing:.08em;background:#389D75;padding:1rem 1.25rem}
-.nav{display:flex;flex-direction:column;gap:.25rem;padding:.5rem}
+.nav{display:flex;flex-direction:column;gap:.25rem;padding:.5rem;margin-top:.9rem}
 .nav__item{display:flex;align-items:center;gap:.7rem;padding:.75rem 1rem;background:transparent;border:0;color:#E9FFFA;border-radius:10px;cursor:pointer}
 .nav__item .badge{margin-left:auto;background:#1d5b4a;padding:.1rem .5rem;border-radius:999px;font-size:.75rem}
 .nav__item .i{width:18px;height:18px;fill:#E9FFFA;opacity:.9}
@@ -111,7 +111,7 @@ body {
 .row__actions{display:flex;gap:.25rem;justify-content:flex-end}
 
 /* три точки */
-.more .dots{letter-spacing:-1px; font-weight:700; font-size:16px; line-height:1}
+.more .dots{letter-spacing:-1px; font-weight:700; font-size:16px; line-height:1; color: #777777}
 .more{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:#fff}
 
 /* popover действий */
@@ -138,6 +138,17 @@ body {
 }
 .row.show-actions .actions-popover{display:flex}
 .actions-popover .icon{width:36px;height:36px;display:inline-grid;place-items:center;border-radius:10px}
+
+/* PNG action icons inside popover */
+.actions-popover .action-icon{
+  width:18px; height:18px; object-fit:contain; display:inline-block;
+  filter: none; /* keep original colors */
+}
+.actions-popover button.icon{width:36px;height:36px;display:inline-grid;place-items:center;border-radius:10px;border:1px solid var(--border);background:#fff;padding:0}
+.actions-popover button.icon:hover{background:var(--brand-50)}
+.actions-popover button.icon:focus{outline:3px solid rgba(46,145,110,.12); outline-offset:2px}
+.actions-popover button.icon.danger{border-color:rgba(226,61,61,0.12)}
+.actions-popover .close-icon{width:14px;height:14px;opacity:.9}
 
 /* маркеры типа */
 .pill{background:var(--brand-50);color:var(--brand);border-radius:999px;padding:.2rem .5rem;font-weight:600}

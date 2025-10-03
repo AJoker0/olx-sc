@@ -21,7 +21,7 @@
 
   <!-- Sidebar -->
   <aside class="sidebar" data-view-role="sidebar" aria-label="Головна навігація">
-    <div class="logo" aria-label="Лого">СЦ</div>
+    <div class="logo" aria-label="Лого"></div>
     <nav class="nav" role="navigation">
       <button class="nav__item is-active" data-route="list" aria-current="page">
         <img class="nav-icon" src="assets/doc.png" alt="" aria-hidden="true" />
@@ -121,16 +121,25 @@
 
         <!-- popover с действиями -->
         <div class="actions-popover" role="menu" aria-label="Дії по заявці">
+          <!-- view (Group.png) -->
           <button class="icon ghost" data-action="view" role="menuitem" title="Переглянути">
-            <svg class="i" aria-hidden="true"><use href="#eye"/></svg>
+            <img src="assets/Frame.png" alt="Переглянути" class="action-icon" />
           </button>
+
+          <!-- edit (Frame.png) -->
           <button class="icon ghost" data-action="edit" role="menuitem" title="Редагувати">
-            <svg class="i" aria-hidden="true"><use href="#edit"/></svg>
+            <img src="assets/Layer 92.png" alt="Редагувати" class="action-icon" />
           </button>
+
+          <!-- delete (bin.png) -->
           <button class="icon danger ghost" data-action="del" role="menuitem" title="Видалити">
-            <svg class="i" aria-hidden="true"><use href="#trash"/></svg>
+            <img src="assets/bin.png" alt="Видалити" class="action-icon" />
           </button>
-          <button class="icon ghost close" data-action="close" role="menuitem" title="Закрити">✕</button>
+
+          <!-- close (Layer 92.png) -->
+          <button class="icon ghost close" data-action="close" role="menuitem" title="Закрити">
+            <img src="assets/Group.png" alt="Закрити" class="action-icon close-icon" />
+          </button>
         </div>
       </div>
     </div>

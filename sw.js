@@ -7,6 +7,10 @@ const ASSETS = [
   './assets/icons.svg',
   './assets/Vector.png',
   './assets/Vector(1).png',
+  './assets/Group.png',
+  './assets/Frame.png',
+  './assets/bin.png',
+  './assets/Layer 92.png',
   './manifest.webmanifest'
 ];
 
