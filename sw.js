@@ -11,6 +11,12 @@ const ASSETS = [
   './assets/Frame.png',
   './assets/bin.png',
   './assets/Layer 92.png',
+  './assets/number.png',
+  './assets/calendar.png',
+  './assets/settings.png',
+  './assets/house.png',
+  './assets/ring.png',
+  './assets/person.png',
   './manifest.webmanifest'
 ];
 
