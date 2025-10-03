@@ -1,4 +1,4 @@
-/* Tiny SPA with: list + inwork + archive, autosave, kebab actions, localStorage */
+
 const $  = (sel, ctx=document) => ctx.querySelector(sel);
 const $$ = (sel, ctx=document) => [...ctx.querySelectorAll(sel)];
 
@@ -36,6 +36,7 @@ function navigate(route){
   window.history.replaceState({}, '', '#'+route);
   render();
   highlightNav(route);
+  closeAllMenus();
 }
 function highlightNav(route){
   $$('.nav__item').forEach(b=>{
@@ -70,7 +71,7 @@ function renderTicketsPage({ title, statusFilter, showNewButton }){
   if(titleEl) titleEl.firstChild.nodeValue = title + ' ';
   const count = getFilteredTickets({ status: statusFilter }).length;
   const chip = view.querySelector('.chip'); if(chip) chip.textContent = '+'+count;
-  // update sidebar badge to always show number of NEW ('Нова') tickets
+ 
   const sideBtn = document.querySelector('.nav__item[data-route="list"]');
   if(sideBtn){
     const sideBadge = sideBtn.querySelector('.badge');
@@ -87,6 +88,12 @@ function renderTicketsPage({ title, statusFilter, showNewButton }){
   filterEl.value = state.ui.filter;
 
   const list = getFilteredTickets({ status: statusFilter });
+  if(!list.length){
+    const empty = document.createElement('div');
+    empty.className = 'empty';
+    empty.innerHTML = '<p style="margin:2rem 0">Нічого не знайдено</p>';
+    body.appendChild(empty);
+  }
   list.forEach((tk)=>{
     const r   = t('tpl-row');
     const row = r.querySelector('.row');
@@ -96,13 +103,42 @@ function renderTicketsPage({ title, statusFilter, showNewButton }){
     c[1].textContent = tk.date;
     c[2].querySelector('[data-kind="type"]').textContent = tk.type;
     c[3].textContent = tk.address || '—';
-    c[4].innerHTML   = `<a class="link" href="tel:+380961458554">${tk.phone || '—'}</a>`;
+    // safer phone link (avoid innerHTML injection)
+    const phoneCell = c[4];
+    phoneCell.innerHTML = '';
+    const phoneAnchor = document.createElement('a');
+    phoneAnchor.className = 'link';
+    const digits = (tk.phone||'').replace(/[^\d+]/g,'');
+    if(digits){
+      phoneAnchor.href = 'tel:'+digits;
+      phoneAnchor.textContent = tk.phone;
+    } else {
+      phoneAnchor.textContent = '—';
+    }
+    phoneCell.appendChild(phoneAnchor);
     c[5].textContent = tk.person || '—';
 
     // три точки
-    row.querySelector('[data-action="more"]').addEventListener('click', (e)=>{
-      e.stopPropagation(); toggleRowMenu(row, null);
-    });
+    const moreBtn = row.querySelector('[data-action="more"]');
+    const pop = row.querySelector('.actions-popover');
+    if(pop){
+      const pid = 'menu-'+tk.id.replace(/\s+/g,'');
+      pop.id = pid;
+      if(moreBtn){ moreBtn.setAttribute('aria-controls', pid); }
+    }
+    if(moreBtn){
+      moreBtn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        toggleRowMenu(row, null);
+        // move focus to first menu item if opening
+        setTimeout(()=>{
+          if(row.classList.contains('show-actions')){
+            const first = row.querySelector('.actions-popover [role="menuitem"]');
+            if(first) first.focus();
+          }
+        },10);
+      });
+    }
 
     // view
     row.querySelector('[data-action="view"]').addEventListener('click', (e)=>{
@@ -112,8 +148,7 @@ function renderTicketsPage({ title, statusFilter, showNewButton }){
     // edit
     row.querySelector('[data-action="edit"]').addEventListener('click', (e)=>{
       e.stopPropagation(); closeAllMenus();
-      // если мы редактируем из "Нові заявки", то переносим пользователя на маршрут #inwork,
-      // но статус НЕ меняем автоматически — он поменяется в форме, если пользователь так выберет.
+      
       if(state.route === 'list'){
         state.route = 'inwork';
         window.history.replaceState({}, '', '#inwork');
@@ -135,25 +170,26 @@ function renderTicketsPage({ title, statusFilter, showNewButton }){
       }
     });
 
-    // закрыть поповер
+    // закрыть 
     row.querySelector('[data-action="close"]').addEventListener('click', (e)=>{
       e.stopPropagation(); toggleRowMenu(row, false);
     });
 
     // клик по строке — просмотр
-    row.addEventListener('click', ()=>openDetail(tk, false, state.route));
+  row.addEventListener('click', ()=>openDetail(tk, false, state.route));
 
     // Mobile long-press: show global action bar instead of inline kebab
     let pressTimer; let longMode = false;
-    const isMobile = () => window.matchMedia('(max-width:880px)').matches;
-    const actionbar = document.querySelector('.m-actionbar');
+  const isMobile = () => window.matchMedia('(max-width:880px)').matches;
+  const actionbar = document.querySelector('.m-actionbar');
     function enterActionMode(ticket){
       if(!actionbar) return;
       longMode = true;
       document.body.classList.add('m-action-mode');
       actionbar.classList.add('is-show');
       actionbar.setAttribute('aria-hidden','false');
-      // wire buttons for this ticket
+      [...actionbar.querySelectorAll('button')].forEach(b=>b.removeAttribute('tabindex'));
+      
       const closeBtn = actionbar.querySelector('.m-actionbar__close');
       const editBtn  = actionbar.querySelector('.m-actionbar__edit');
       const delBtn   = actionbar.querySelector('.m-actionbar__del');
@@ -176,7 +212,11 @@ function renderTicketsPage({ title, statusFilter, showNewButton }){
     function exitActionMode(){
       longMode = false;
       document.body.classList.remove('m-action-mode');
-      if(actionbar){ actionbar.classList.remove('is-show'); actionbar.setAttribute('aria-hidden','true'); }
+      if(actionbar){
+        actionbar.classList.remove('is-show');
+        actionbar.setAttribute('aria-hidden','true');
+        [...actionbar.querySelectorAll('button')].forEach(b=>b.setAttribute('tabindex','-1'));
+      }
     }
     function startPress(e){
       if(!isMobile()) return; if(e.type==='mousedown') return;
@@ -212,7 +252,7 @@ function renderTicketsPage({ title, statusFilter, showNewButton }){
     body.appendChild(r);
   });
 
-  // события поиска/фильтра
+  // события поиска
   searchEl.addEventListener('input', (e)=>{ state.ui.search = e.target.value.trim().toLowerCase(); render(); });
   filterEl.addEventListener('change', (e)=>{ state.ui.filter = e.target.value; render(); });
 
@@ -227,7 +267,7 @@ function renderTicketsPage({ title, statusFilter, showNewButton }){
 function render(){
   const app = $('#app');
 
-  // сохранить фокус (чтобы поиск не терял каретку)
+  // сохранить фокус 
   const prevActive = document.activeElement;
   const preserve = (prevActive && prevActive.id &&
     (prevActive.tagName==='INPUT'||prevActive.tagName==='TEXTAREA'||prevActive.tagName==='SELECT'))
@@ -245,7 +285,7 @@ function render(){
     app.innerHTML = '<section class="panel empty"><p>Сторінка у розробці.</p></section>';
   }
 
-  // восстановить фокус
+  
   if(preserve){
     const restored = document.getElementById(preserve.id) || app.querySelector('#'+preserve.id);
     if(restored){
@@ -254,7 +294,7 @@ function render(){
   } else { app.focus(); }
 }
 
-/* Popover helpers */
+
 function toggleRowMenu(row, forceOpen=null){
   const open = forceOpen===null ? !row.classList.contains('show-actions') : forceOpen;
   closeAllMenus();
@@ -293,14 +333,19 @@ function createNewTicket(){
   openNewTicketForm(newTicket);
 }
 function generateTicketId(){
-  const lastId = Math.max(...state.tickets.map(t => parseInt(t.id.replace(' ', ''))));
-  return (lastId + 1).toString().replace(/(\d{2})(\d{3})/, '$1 $2');
+  const nums = state.tickets
+    .map(t => parseInt((t.id||'').replace(/\D/g,''),10))
+    .filter(n=>Number.isFinite(n));
+  const lastId = nums.length ? Math.max(...nums) : 63753;
+  return String(lastId+1).replace(/(\d{2})(\d{3})/, '$1 $2');
 }
 function openNewTicketForm(tk){
   const app = $('#app');
   app.innerHTML = '';
   const view = document.querySelector('#tpl-new-ticket').content.cloneNode(true);
   view.querySelector('#new-ticket-id').textContent = tk.id;
+  const telField = view.querySelector('input[type="tel"]');
+  if(telField){ telField.setAttribute('inputmode','tel'); telField.setAttribute('pattern','^[+\\d][\\d\\s-]{6,}$'); }
 
   view.querySelector('[data-route="list"]').addEventListener('click', (e)=>{
     e.preventDefault(); navigate('list');
@@ -342,7 +387,7 @@ function openDetail(tk, edit=false, backTo=state.route){
 
   const form = view.querySelector('#ticket-form');
 
-  // Photo picker wiring: file input, add button and preview
+ 
   const fileInput = view.querySelector('#photoInput');
   const addBtn = view.querySelector('#addPhotoBtn');
   const preview = view.querySelector('#photoPreview');
@@ -357,7 +402,7 @@ function openDetail(tk, edit=false, backTo=state.route){
     });
   }
 
-  // Заполнить текущими значениями (status и т.д.)
+  // Заполнить текущими значениями 
   [...form.querySelectorAll('[name]')].forEach(el=>{
     const name = el.name;
     if(!name || el.type === 'file') return;
@@ -387,7 +432,7 @@ function openDetail(tk, edit=false, backTo=state.route){
     }
     const idx = state.tickets.findIndex(x=>x.id===tk.id);
     if(idx>-1){ state.tickets[idx] = updated; saveState(); tk = updated; }
-    // апдейт мини-резюме
+   
     const sumWhat   = view.querySelector('#s-what');
     const sumAddr   = view.querySelector('#s-address');
     const sumPhone  = view.querySelector('#s-phone');
@@ -403,7 +448,7 @@ function openDetail(tk, edit=false, backTo=state.route){
     e.preventDefault();
     autosave();
     toast('Збережено ✔');
-    // возвращаемся туда, откуда пришли (в т.ч. в "Заявки у роботі")
+    
     navigate(backTo || 'list');
   });
 
