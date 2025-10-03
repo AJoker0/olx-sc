@@ -142,6 +142,45 @@ function renderTicketsPage({ title, statusFilter, showNewButton }){
 
     // клик по строке — просмотр
     row.addEventListener('click', ()=>openDetail(tk, false, state.route));
+
+    // Mobile long-press to show kebab (hide button by default in CSS)
+    // Активируется только на экранах < 881px и для touch-взаимодействий
+    let pressTimer; let longShown = false;
+    const isMobile = () => window.matchMedia('(max-width:880px)').matches;
+    function startPress(e){
+      if(!isMobile()) return; if(e.type==='mousedown') return; // игнорируем мышь
+      clearTimeout(pressTimer);
+      pressTimer = setTimeout(()=>{
+        row.classList.add('show-kebab');
+        longShown = true;
+      }, 420); // 420ms hold
+    }
+    function cancelPress(){ clearTimeout(pressTimer); }
+    function maybeHide(){ if(!isMobile()) return; if(longShown){ setTimeout(()=>{ row.classList.remove('show-kebab'); longShown=false; }, 3000); } }
+    row.addEventListener('touchstart', startPress, {passive:true});
+    row.addEventListener('touchmove', cancelPress, {passive:true});
+    row.addEventListener('touchend', (e)=>{ cancelPress(); if(!longShown) { /* обычный tap уже откроет detail через click */ } else { e.preventDefault(); maybeHide(); }}, {passive:false});
+    row.addEventListener('touchcancel', cancelPress, {passive:true});
+
+    // Mobile layout transformation: build stacked lines
+    if(window.matchMedia('(max-width:880px)').matches){
+      row.classList.add('m-card');
+      const lines = document.createElement('div');
+      lines.className = 'm-lines';
+      lines.innerHTML = `
+        <div class="m-line m-line-top">
+          <span class="m-id">№ ${tk.id}</span>
+          <span class="m-date">${tk.date}</span>
+          <span class="m-tag">${tk.type}</span>
+        </div>
+        <div class="m-line m-address">${tk.address || '—'}</div>
+        <div class="m-line m-phone"><a class="link" href="tel:${tk.phone.replace(/\s+/g,'')}">${tk.phone || '—'}</a></div>
+        <div class="m-line m-person">${tk.person || '—'}</div>
+      `;
+      // insert lines before actions container
+      const actionsCell = row.querySelector('.row__actions');
+      row.insertBefore(lines, actionsCell);
+    }
     body.appendChild(r);
   });
 

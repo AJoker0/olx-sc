@@ -60,6 +60,15 @@
     <h1>Сервісний центр “Назва”</h1>
   </header>
 
+  <!-- Mobile profile strip (hidden on desktop) -->
+  <div class="m-profile" aria-label="Профіль користувача">
+    <img class="m-profile__avatar" src="assets/avatar.jpg" alt="" />
+    <div class="m-profile__name">Кучеренко Костянтин Ігорович</div>
+    <button class="m-profile__logout" data-route="logout" aria-label="Вийти">
+      <svg class="i" aria-hidden="true"><use href="#logout"/></svg>
+    </button>
+  </div>
+
   <!-- App root -->
   <main id="app" class="app shell" tabindex="-1" aria-live="polite"></main>
 
