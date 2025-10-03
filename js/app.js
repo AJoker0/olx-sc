@@ -12,6 +12,23 @@ const state = {
   ui: { search:'', filter:'all' }
 };
 
+// Persistence helpers (localStorage)
+const STORAGE_KEY = 'olx-sc-state';
+function saveState(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify({ tickets: state.tickets })); }catch(e){}
+}
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const parsed = JSON.parse(raw);
+    if(parsed && Array.isArray(parsed.tickets)) state.tickets = parsed.tickets;
+  }catch(e){}
+}
+
+// load persisted state on script init
+loadState();
+
 function navigate(route) {
   state.route = route;
   window.history.replaceState({}, '', '#'+route);
@@ -30,6 +47,12 @@ function highlightNav(route){
 
 function render(){
   const app = $('#app');
+  // preserve focused input (id and caret) so fast re-renders (e.g. on search input)
+  const prevActive = document.activeElement;
+  const preserve = (prevActive && prevActive.id && (prevActive.tagName==='INPUT' || prevActive.tagName==='TEXTAREA' || prevActive.tagName==='SELECT'))
+    ? { id: prevActive.id, start: prevActive.selectionStart, end: prevActive.selectionEnd }
+    : null;
+
   app.innerHTML = '';
   const t = (id)=>document.querySelector(`#${id}`).content.cloneNode(true);
 
@@ -76,6 +99,7 @@ function render(){
         if(confirm('Видалити заявку '+tk.id+'?')){
           const idxInState = state.tickets.findIndex(x=>x.id===tk.id);
           state.tickets.splice(idxInState,1);
+          saveState();
           render();
           toast('Заявку видалено');
         }
@@ -111,8 +135,22 @@ function render(){
     app.innerHTML = '<section class="panel empty"><p>Сторінка у розробці.</p></section>';
   }
 
-  // a11y: focus main after render
-  app.focus();
+  // restore focus if user was typing in an input (search); otherwise focus main for a11y
+  if(preserve){
+    // try to find the new element with same id inside the freshly rendered app
+    const restored = document.getElementById(preserve.id) || app.querySelector('#'+preserve.id);
+    if(restored){
+      try{ restored.focus();
+        if(typeof preserve.start === 'number' && typeof restored.setSelectionRange === 'function'){
+          restored.setSelectionRange(preserve.start, preserve.end || preserve.start);
+        }
+      }catch(e){ /* ignore focus errors */ }
+    } else {
+      app.focus();
+    }
+  } else {
+    app.focus();
+  }
 }
 
 /* helpers for menu */
@@ -190,6 +228,7 @@ function openNewTicketForm(tk){
       person: formData.get('client') || 'Не вказано'
     };
     state.tickets.unshift(newTicket);
+    saveState();
     toast('Нову заявку створено ✔');
     navigate('list');
   });
@@ -214,6 +253,19 @@ function openDetail(tk, edit=false){
 
   view.querySelector('#ticket-form').addEventListener('submit', (e)=>{
     e.preventDefault();
+    // collect values and persist changes back to state
+    const form = e.target;
+    const fd = new FormData(form);
+    const updated = {
+      id: tk.id,
+      date: fd.get('date') || tk.date,
+      type: fd.get('device') || tk.type,
+      address: fd.get('address') || tk.address,
+      phone: fd.get('phone') || tk.phone,
+      person: fd.get('client') || tk.person
+    };
+    const idx = state.tickets.findIndex(x=>x.id===tk.id);
+    if(idx>-1){ state.tickets[idx] = updated; saveState(); }
     toast('Збережено ✔');
     navigate('list');
   });
