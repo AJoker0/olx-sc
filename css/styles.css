@@ -44,6 +44,7 @@ body {
 
 /* ---------- LAYOUT ---------- */
 .shell{padding:1.25rem}
+.m-profile,.m-actionbar{display:none;} /* hide mobile-only bars on desktop explicitly */
 .topbar{position:sticky;top:0;z-index:6;background:var(--panel);box-shadow:var(--shadow);padding:.9rem 1.25rem}
 .topbar h1{font-size:1.1rem;margin:0;color:#0D0D0D;letter-spacing:.2px}
 @media (max-width:880px){ .topbar h1{text-align:center;width:100%;} }
@@ -92,6 +93,7 @@ body {
 }
 @media (max-width: 880px){
   body::before, body::after{ display:none; }
+  .m-actionbar{display:flex}
 }
 
 /* ---------- SIDEBAR ---------- */
