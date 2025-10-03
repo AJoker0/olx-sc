@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#2E916E">
+  <meta name="color-scheme" content="light only">
+  <title>Сервісний центр “Назва”</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/styles.css" />
+  <!-- preload внешнего спрайта не нужен при inline -->
+</head>
+<body>
+  <a class="skip-link" href="#app">Перейти до контенту</a>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" data-view-role="sidebar" aria-label="Головна навігація">
+    <div class="logo" aria-label="Лого">СЦ</div>
+    <nav class="nav" role="navigation">
+      <button class="nav__item is-active" data-route="list" aria-current="page">
+        <svg class="i" aria-hidden="true"><use href="#doc"/></svg>
+        <span>Нові заявки</span>
+        <span class="badge" aria-label="кількість нових">2</span>
+      </button>
+      <button class="nav__item" data-route="inwork">
+        <svg class="i" aria-hidden="true"><use href="#tools"/></svg>
+        <span>Заявки у роботі</span>
+      </button>
+      <button class="nav__item" data-route="archive">
+        <svg class="i" aria-hidden="true"><use href="#archive"/></svg>
+        <span>Архів заявок</span>
+      </button>
+      <button class="nav__item" data-route="masters">
+        <svg class="i" aria-hidden="true"><use href="#users"/></svg>
+        <span>Майстри</span>
+      </button>
+      <button class="nav__item" data-route="contacts">
+        <svg class="i" aria-hidden="true"><use href="#phone"/></svg>
+        <span>Контакти</span>
+      </button>
+      <div class="grow" aria-hidden="true"></div>
+      <button class="nav__item" data-route="logout">
+        <svg class="i" aria-hidden="true"><use href="#logout"/></svg>
+        <span>Вихід</span>
+      </button>
+    </nav>
+  </aside>
+
+  <!-- Top bar -->
+  <header class="topbar" role="banner">
+    <h1>Сервісний центр “Назва”</h1>
+  </header>
+
+  <!-- App root -->
+  <main id="app" class="app shell" tabindex="-1" aria-live="polite">
+    <!-- Views are injected here by app.js -->
+  </main>
+
+  <!-- Templates -->
+  <template id="tpl-list">
+    <section class="panel" aria-labelledby="l-title">
+      <header class="panel__head">
+        <h2 id="l-title">Нові заявки <span class="chip">+10</span></h2>
+        <div class="controls">
+          <label class="select" aria-label="Фільтр приладів">
+            <select id="filter-device">
+              <option value="all">Усі прилади</option>
+              <option value="Газовий котел">Газовий котел</option>
+              <option value="Бойлер">Бойлер</option>
+            </select>
+            <svg class="i chevron" aria-hidden="true"><use href="#chevron"/></svg>
+          </label>
+          <label class="search" aria-label="Пошук">
+            <svg class="i" aria-hidden="true"><use href="#search"/></svg>
+            <input id="search" type="search" placeholder="Пошук" autocomplete="off" />
+          </label>
+          <button class="btn icon" title="Нова заявка" type="button" aria-label="Додати нову заявку">
+            <svg class="i"><use href="#plus"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="table" role="table" aria-label="Список заявок">
+        <div class="table__head" role="row">
+          <div role="columnheader">№ Заявки</div>
+          <div role="columnheader">Дата</div>
+          <div role="columnheader">Що зламалося</div>
+          <div role="columnheader">Адреса</div>
+          <div role="columnheader">Телефон</div>
+          <div role="columnheader">Ім'я клієнта</div>
+          <div role="columnheader" aria-hidden="true"></div>
+        </div>
+        <div class="table__body" id="rows" role="rowgroup"></div>
+      </div>
+    </section>
+  </template>
+
+  <template id="tpl-row">
+    <div class="row" role="row">
+      <div class="muted" role="cell" data-col="id">63 753</div>
+      <div role="cell" data-col="date">19.01.25</div>
+      <div role="cell" data-col="type"><span class="pill" data-kind="type">Газовий котел</span></div>
+      <div role="cell" data-col="address">Вул. Чорноморського Козацтва, 806</div>
+      <div role="cell" data-col="phone"><a class="link" href="tel:+380961458554">096 145 85 54</a></div>
+      <div role="cell" data-col="person">Поздняков Артем</div>
+
+      <div class="row__actions" role="cell">
+        <!-- три точки -->
+        <button class="icon ghost more" data-action="more" aria-haspopup="true" aria-expanded="false" title="Дії"><span class="dots" aria-hidden="true">•••</span></button>
+
+        <!-- popover с действиями -->
+        <div class="actions-popover" role="menu" aria-label="Дії по заявці">
+          <button class="icon ghost" data-action="view" role="menuitem" title="Переглянути">
+            <svg class="i" aria-hidden="true"><use href="#eye"/></svg>
+          </button>
+          <button class="icon ghost" data-action="edit" role="menuitem" title="Редагувати">
+            <svg class="i" aria-hidden="true"><use href="#edit"/></svg>
+          </button>
+          <button class="icon danger ghost" data-action="del" role="menuitem" title="Видалити">
+            <svg class="i" aria-hidden="true"><use href="#trash"/></svg>
+          </button>
+          <button class="icon ghost close" data-action="close" role="menuitem" title="Закрити">✕</button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-detail">
+    <section class="panel">
+      <a class="back" data-route="list" href="#">
+        <svg class="i" aria-hidden="true"><use href="#arrow-left"/></svg>
+        Повернутися до списку
+      </a>
+
+      <header class="summary">
+        <div class="summary__title">
+          <h2>Заявка <span id="ticket-id"></span></h2>
+        </div>
+        <ul class="summary__tags">
+          <li><span class="dot" aria-hidden="true"></span>Що зламалося <b id="s-what">Бойлер</b></li>
+          <li><span class="dot" aria-hidden="true"></span>Коментар клієнта <b id="s-comment">Не включається, не гріє воду</b></li>
+          <li><span class="dot" aria-hidden="true"></span>Майстер <b id="s-master">Петрович М.</b></li>
+          <li><span class="dot" aria-hidden="true"></span>Адреса <b id="s-address">Одеса, вул. Чорноморського Козацтва, 806</b></li>
+          <li><span class="dot" aria-hidden="true"></span>Контакт клієнта <b id="s-phone">096 585 45 14, Поздняков Артем</b></li>
+        </ul>
+      </header>
+
+      <form class="form" id="ticket-form" novalidate>
+        <h3>Деталі заявки</h3>
+
+        <label class="field select">
+          <span>Статус заявки</span>
+          <select name="status">
+            <option>Нова</option>
+            <option>У роботі</option>
+            <option>Виконана</option>
+          </select>
+          <svg class="i chevron" aria-hidden="true"><use href="#chevron"/></svg>
+        </label>
+
+        <div class="row-2">
+          <label class="field select">
+            <span>Тип робіт</span>
+            <select name="workType">
+              <option>Огляд технічного стану обладнання</option>
+              <option selected>Сервісне обслуговування обладнання</option>
+              <option>Виконання робіт за гарантійного ремонту</option>
+              <option>Акт відмови в проведенні пуско-налагоджувальних робіт</option>
+            </select>
+            <svg class="i chevron" aria-hidden="true"><use href="#chevron"/></svg>
+          </label>
+
+          <label class="field select">
+            <span>Модель виробу</span>
+            <select name="model">
+              <option>Rens 80 I</option>
+              <option>Rens 100 I</option>
+            </select>
+            <svg class="i chevron" aria-hidden="true"><use href="#chevron"/></svg>
+          </label>
+        </div>
+
+        <div class="row-2">
+          <label class="field">
+            <span>Дата введення в експлуатацію</span>
+            <input type="date" value="2025-06-17" name="startDate"/>
+          </label>
+          <label class="field">
+            <span>Дата останнього проведення тех. обслуговування</span>
+            <input type="date" value="2025-06-17" name="lastService"/>
+          </label>
+        </div>
+
+        <label class="field">
+          <span>Коментар майстра</span>
+          <textarea rows="4" placeholder="Напишіть тут коментар щодо ремонту" name="comment"></textarea>
+        </label>
+
+        <div class="row-3">
+          <label class="field select">
+            <span>Причина виходу з ладу</span>
+            <select name="reason">
+              <option>Перегорів ТЕН</option>
+              <option>Протікання</option>
+              <option>Електрика</option>
+            </select>
+            <svg class="i chevron" aria-hidden="true"><use href="#chevron"/></svg>
+          </label>
+
+          <label class="field select">
+            <span>Гарантійний випадок</span>
+            <select name="warranty">
+              <option>Так</option>
+              <option>Ні</option>
+            </select>
+            <svg class="i chevron" aria-hidden="true"><use href="#chevron"/></svg>
+          </label>
+
+          <label class="field file">
+            <span>Фото причини поломки</span>
+            <input type="file" accept="image/*" />
+            <button type="button" class="btn ghost">
+              <svg class="i" aria-hidden="true"><use href="#plus"/></svg> Додати фото
+            </button>
+          </label>
+        </div>
+
+        <div class="row-3">
+          <label class="field select">
+            <span>Які запчастини потрібні для ремонту ?</span>
+            <select name="part">
+              <option>ТЕН 1842</option>
+              <option>Клапан</option>
+              <option>Термодатчик</option>
+            </select>
+            <svg class="i chevron" aria-hidden="true"><use href="#chevron"/></svg>
+          </label>
+
+          <label class="field">
+            <span>Номер запчастини</span>
+            <input type="text" value="184232" name="partNo" />
+          </label>
+
+          <label class="field">
+            <span>Ціна запчастин, грн</span>
+            <input type="number" inputmode="decimal" placeholder="0,00" name="partsCost" />
+          </label>
+        </div>
+
+        <div class="row-2">
+          <label class="field">
+            <span>Вартість робіт, грн</span>
+            <input type="number" inputmode="decimal" placeholder="0,00" name="worksCost" />
+          </label>
+
+          <label class="field">
+            <span>Загальна вартість, грн</span>
+            <input type="number" inputmode="decimal" placeholder="0,00" name="totalCost" />
+          </label>
+        </div>
+
+        <label class="field select">
+          <span>Який документ сформуємо?</span>
+          <select name="doc">
+            <option>Акт введення в експлуатацію (.pdf)</option>
+            <option>Акт виконаних робіт (.pdf)</option>
+          </select>
+          <svg class="i chevron" aria-hidden="true"><use href="#chevron"/></svg>
+        </label>
+
+        <div class="form__actions">
+          <button class="btn primary" type="submit">Зберегти</button>
+        </div>
+      </form>
+    </section>
+  </template>
+
+  <template id="tpl-new-ticket">
+    <section class="panel">
+      <a href="#" class="back" data-route="list">
+        <svg class="i" aria-hidden="true"><use href="#arrow-left"/></svg>
+        Назад до списку
+      </a>
+
+      <header class="summary">
+        <div class="summary__title">
+          <h2>Нова заявка <span id="new-ticket-id">63 758</span></h2>
+        </div>
+      </header>
+
+      <form class="form" id="new-ticket-form" novalidate>
+        <h3>Основна інформація</h3>
+
+        <div class="row-2">
+          <label class="field">
+            <span>Ім'я клієнта</span>
+            <input type="text" name="client" placeholder="Введіть ім'я клієнта" required/>
+          </label>
+          <label class="field">
+            <span>Телефон</span>
+            <input type="tel" name="phone" placeholder="+380..." required/>
+          </label>
+        </div>
+
+        <label class="field">
+          <span>Адреса</span>
+          <input type="text" name="address" placeholder="Вул. Назва, номер будинку" required/>
+        </label>
+
+        <label class="field select">
+          <span>Тип обладнання</span>
+          <select name="device" required>
+            <option value="Газовий котел">Газовий котел</option>
+            <option value="Бойлер">Бойлер</option>
+          </select>
+          <svg class="i chevron" aria-hidden="true"><use href="#chevron"/></svg>
+        </label>
+
+        <label class="field">
+          <span>Опис проблеми</span>
+          <textarea rows="3" name="problem" placeholder="Опишіть що не працює або потребує ремонту"></textarea>
+        </label>
+
+        <div class="form__actions">
+          <button class="btn" type="button" data-route="list">Скасувати</button>
+          <button class="btn primary" type="submit">Створити заявку</button>
+        </div>
+      </form>
+    </section>
+  </template>
+
+  <template id="tpl-inwork">
+    <section class="panel empty">
+      <h2>Заявки у роботі</h2>
+      <p>Для демо тут тільки макет. Поверніться на “Нові заявки”.</p>
+    </section>
+  </template>
+
+  <!-- Mobile bottom-tab -->
+  <nav class="tabbar" aria-label="Нижня навігація">
+    <button class="tab is-active" data-route="list" type="button">
+      <svg class="i" aria-hidden="true"><use href="#doc"/></svg>
+      Нові заявки
+    </button>
+    <button class="tab" data-route="inwork" type="button">
+      <svg class="i" aria-hidden="true"><use href="#tools"/></svg>
+      Заявки у роботі
+    </button>
+    <button class="tab" data-route="profile" type="button">
+      <svg class="i" aria-hidden="true"><use href="#user"/></svg>
+      Профіль
+    </button>
+  </nav>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="js/app.js" defer></script>
+  <script>
+    // SW регистрируем только по http/https, чтобы не мешал при file://
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(()=>{});
+      });
+    }
+  </script>
+
+  <!-- Inline SVG sprite (работает по file://) -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+    <!-- Документ -->
+    <symbol id="doc" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 3h8l5 5v13H6z"/>
+        <path d="M14 3v6h6"/>
+      </g>
+    </symbol>
+
+    <!-- Инструменты -->
+    <symbol id="tools" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14.5 5a4 4 0 0 0 5 5l-9 9a2 2 0 0 1-3 0l-2-2a2 2 0 0 1 0-3l9-9z"/>
+        <path d="M12 7l5 5"/>
+      </g>
+    </symbol>
+
+    <!-- Архив/ящик -->
+    <symbol id="archive" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="4" rx="1"/>
+        <path d="M5 8h14v9a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/>
+        <path d="M9 12h6"/>
+      </g>
+    </symbol>
+
+    <!-- Пользователи -->
+    <symbol id="users" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="9" cy="8" r="3"/>
+        <path d="M4 19a5 5 0 0 1 10 0"/>
+        <circle cx="17" cy="10" r="2"/>
+        <path d="M14.5 19a4.5 4.5 0 0 1 5.5 0"/>
+      </g>
+    </symbol>
+
+    <!-- Телефон -->
+    <symbol id="phone" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 16.92v2a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07A19.5 19.5 0 0 1 3.15 9.81 19.86 19.86 0 0 1 .08 1.18 2 2 0 0 1 2.06 0h2a2 2 0 0 1 2 1.72 12.66 12.66 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L5.4 8.1a16 16 0 0 0 6.5 6.5l1.46-1.91a2 2 0 0 1 2.11-.45 12.66 12.66 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+      </g>
+    </symbol>
+
+    <!-- Выход -->
+    <symbol id="logout" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <path d="M16 17l5-5-5-5"/>
+        <path d="M21 12H9"/>
+      </g>
+    </symbol>
+
+    <!-- Пользователь -->
+    <symbol id="user" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="7" r="4"/>
+        <path d="M5.5 21a7.5 7.5 0 0 1 13 0"/>
+      </g>
+    </symbol>
+
+    <!-- Лупа -->
+    <symbol id="search" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="7"/>
+        <path d="M21 21l-4.3-4.3"/>
+      </g>
+    </symbol>
+
+    <!-- Плюс -->
+    <symbol id="plus" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M12 5v14M5 12h14"/>
+      </g>
+    </symbol>
+
+    <!-- Глаз -->
+    <symbol id="eye" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </g>
+    </symbol>
+
+    <!-- Карандаш -->
+    <symbol id="edit" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 20h9"/>
+        <path d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z"/>
+      </g>
+    </symbol>
+
+    <!-- Мусорка -->
+    <symbol id="trash" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 6h18"/>
+        <path d="M8 6v-2a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+        <path d="M10 11v6M14 11v6"/>
+      </g>
+    </symbol>
+
+    <!-- Стрелка влево -->
+    <symbol id="arrow-left" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5"/>
+        <path d="M12 19l-7-7 7-7"/>
+      </g>
+    </symbol>
+
+    <!-- Чеврон вниз -->
+    <symbol id="chevron" viewBox="0 0 24 24">
+      <polyline points="6 9 12 15 18 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </svg>
+</body>
+</html>
