@@ -95,6 +95,8 @@ body {
 .table{width:100%}
 .table__head,.row{display:grid;grid-template-columns:120px 120px 220px 1fr 150px 180px 120px;gap:16px;align-items:center}
 .table__head{color:#55706A;text-transform:uppercase;font-size:.76rem;letter-spacing:.05em;border-bottom:1px solid var(--line);padding:.5rem 0}
+/* center top header labels */
+.table__head > div{ text-align:center }
 /* Card-like rows (as in mock) */
 .row{
   position:relative;
@@ -205,16 +207,39 @@ body {
   .table__head,.row{grid-template-columns:100px 100px 200px 1fr 140px 1fr 120px}
   .summary__tags{grid-template-columns:1fr}
 }
+/* Narrow desktop / tablets: keep desktop grid but allow horizontal scroll to avoid overlap */
+@media (min-width: 881px) and (max-width: 1280px){
+  .table{overflow-x:auto; overscroll-behavior-x:contain}
+  /* enforce a minimum content width so a scrollbar appears instead of squishing */
+  .table__head, .table__body{min-width:1120px}
+}
 @media (max-width: 880px){
   .sidebar{display:none}
   .app{margin-left:0}
   .topbar{margin-left:0}
   .shell{padding:1rem .75rem 4.5rem}
   .panel__head{flex-direction:column;align-items:flex-start;gap:.75rem}
+  /* Mobile: hide header and legend, and show per-cell labels */
+  .table{display:block}
   .table__head{display:none}
+  .table__legend{display:none}
   .row{grid-template-columns:1fr;gap:.5rem;border:1px solid var(--line);padding:.9rem;border-radius:12px;margin:.4rem 0}
   .row__actions{justify-content:flex-start}
   .tabbar{display:flex}
+
+  /* Per-cell labels using data-col attr */
+  .row [role="cell"]{display:grid;grid-template-columns:120px 1fr;align-items:center}
+  .row [role="cell"][data-col]:before{content:attr(data-col); color:#55706A; text-transform:uppercase; font-size:.76rem; letter-spacing:.05em}
+  /* Map readable Ukrainian labels instead of raw data-col keys */
+  .row [data-col="id"]:before{content:"№ заявки"}
+  .row [data-col="date"]:before{content:"Дата"}
+  .row [data-col="type"]:before{content:"Що зламалося"}
+  .row [data-col="address"]:before{content:"Адреса"}
+  .row [data-col="phone"]:before{content:"Телефон"}
+  .row [data-col="person"]:before{content:"Ім'я клієнта"}
+  /* keep actions cell as flex and without label */
+  .row .row__actions[role="cell"]{display:flex; grid-template-columns:initial}
+  .row .row__actions[role="cell"]:before{content:none}
 }
 @media (max-width: 520px){
   .row-2{grid-template-columns:1fr}
