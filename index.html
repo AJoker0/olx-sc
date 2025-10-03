@@ -25,6 +25,7 @@
       <button class="nav__item is-active" data-route="list" aria-current="page">
         <img class="nav-icon" src="assets/doc.png" alt="" aria-hidden="true" />
         <span>Нові заявки</span>
+        <span class="badge" aria-hidden="true">2</span>
       </button>
       <button class="nav__item" data-route="inwork">
         <span class="i-stack" aria-hidden="true">
@@ -131,6 +132,7 @@
     </div>
   </template>
 
+  <!-- DETAIL: порядок як на макеті -->
   <template id="tpl-detail">
     <section class="panel">
       <a class="back" data-route="list" href="#">
@@ -154,6 +156,7 @@
       <form class="form" id="ticket-form" novalidate>
         <h3>Деталі заявки</h3>
 
+        <!-- Статус -->
         <label class="field select">
           <span>Статус заявки</span>
           <select name="status">
@@ -164,115 +167,129 @@
           <svg class="i chevron" aria-hidden="true"><use href="#chevron"/></svg>
         </label>
 
-        <div class="row-2">
-          <label class="field select">
-            <span>Тип робіт</span>
-            <select name="workType">
-              <option>Огляд технічного стану обладнання</option>
-              <option selected>Сервісне обслуговування обладнання</option>
-              <option>Виконання робіт за гарантійного ремонту</option>
-              <option>Акт відмови в проведенні пуско-налагоджувальних робіт</option>
-            </select>
-            <svg class="i chevron" aria-hidden="true"><use href="#chevron"/></svg>
+        <!-- Майстер + кнопка справа -->
+        <div class="row-inline">
+          <label class="field">
+            <span>Майстер</span>
+            <input type="text" name="master" placeholder="ПІБ майстра" value="Петрович М." />
           </label>
-
-          <label class="field select">
-            <span>Модель виробу</span>
-            <select name="model">
-              <option>Rens 80 I</option>
-              <option>Rens 100 I</option>
-            </select>
-            <svg class="i chevron" aria-hidden="true"><use href="#chevron"/></svg>
-          </label>
+          <button type="button" class="btn primary master-btn">Змінити майстра</button>
         </div>
 
-        <div class="row-2">
-          <label class="field">
-            <span>Дата введення в експлуатацію</span>
-            <input type="date" value="2025-06-17" name="startDate"/>
-          </label>
-          <label class="field">
-            <span>Дата останнього проведення тех. обслуговування</span>
-            <input type="date" value="2025-06-17" name="lastService"/>
-          </label>
-        </div>
+        <!-- Тип робіт -->
+        <label class="field select">
+          <span>Тип робіт</span>
+          <select name="workType">
+            <option>Огляд технічного стану обладнання</option>
+            <option selected>Сервісне обслуговування обладнання</option>
+            <option>Виконання робіт за гарантійного ремонту</option>
+            <option>Акт відмови в проведенні пуско-налагоджувальних робіт</option>
+          </select>
+          <svg class="i chevron" aria-hidden="true"><use href="#chevron"/></svg>
+        </label>
 
+        <!-- Модель -->
+        <label class="field select">
+          <span>Модель виробу</span>
+          <select name="model">
+            <option>Rens 80 I</option>
+            <option>Rens 100 I</option>
+          </select>
+          <svg class="i chevron" aria-hidden="true"><use href="#chevron"/></svg>
+        </label>
+
+        <!-- Дати -->
+        <label class="field">
+          <span>Дата введення в експлуатацію</span>
+          <input type="date" value="2025-06-17" name="startDate"/>
+        </label>
+        <label class="field">
+          <span>Дата останнього проведення тех. обслуговування</span>
+          <input type="date" value="2025-06-17" name="lastService"/>
+        </label>
+
+        <!-- Коментар майстра -->
         <label class="field">
           <span>Коментар майстра</span>
           <textarea rows="4" placeholder="Напишіть тут коментар щодо ремонту" name="comment"></textarea>
         </label>
 
-        <div class="row-3">
-          <label class="field select">
-            <span>Причина виходу з ладу</span>
-            <select name="reason">
-              <option>Перегорів ТЕН</option>
-              <option>Протікання</option>
-              <option>Електрика</option>
-            </select>
-            <svg class="i chevron" aria-hidden="true"><use href="#chevron"/></svg>
-          </label>
-
-          <label class="field select">
-            <span>Гарантійний випадок</span>
-            <select name="warranty">
-              <option>Так</option>
-              <option>Ні</option>
-            </select>
-            <svg class="i chevron" aria-hidden="true"><use href="#chevron"/></svg>
-          </label>
-
-          <label class="field file">
-            <span>Фото причини поломки</span>
-            <input type="file" accept="image/*" />
-            <button type="button" class="btn ghost">
-              <svg class="i" aria-hidden="true"><use href="#plus"/></svg> Додати фото
-            </button>
-          </label>
+        <!-- Додати ще причину -->
+        <div class="add-line">
+          <button class="btn-square" type="button" id="addReasonBtn" aria-label="Додати ще причину">
+            <svg class="i" aria-hidden="true"><use href="#plus"/></svg>
+          </button>
+          <span>Додати ще причину виходу з ладу</span>
         </div>
 
-        <div class="row-3">
-          <label class="field select">
-            <span>Які запчастини потрібні для ремонту ?</span>
-            <select name="part">
-              <option>ТЕН 1842</option>
-              <option>Клапан</option>
-              <option>Термодатчик</option>
-            </select>
-            <svg class="i chevron" aria-hidden="true"><use href="#chevron"/></svg>
-          </label>
-
-          <label class="field">
-            <span>Номер запчастини</span>
-            <input type="text" value="184232" name="partNo" />
-          </label>
-
-          <label class="field">
-            <span>Ціна запчастин, грн</span>
-            <input type="number" inputmode="decimal" placeholder="0,00" name="partsCost" />
-          </label>
-        </div>
-
-        <div class="row-2">
-          <label class="field">
-            <span>Вартість робіт, грн</span>
-            <input type="number" inputmode="decimal" placeholder="0,00" name="worksCost" />
-          </label>
-
-          <label class="field">
-            <span>Загальна вартість, грн</span>
-            <input type="number" inputmode="decimal" placeholder="0,00" name="totalCost" />
-          </label>
-        </div>
-
+        <!-- Причина + Гарантійний -->
         <label class="field select">
-          <span>Який документ сформуємо?</span>
-          <select name="doc">
-            <option>Акт введення в експлуатацію (.pdf)</option>
-            <option>Акт виконаних робіт (.pdf)</option>
+          <span>Причина виходу з ладу</span>
+          <select name="reason">
+            <option>Перегорів ТЕН</option>
+            <option>Протікання</option>
+            <option>Електрика</option>
           </select>
           <svg class="i chevron" aria-hidden="true"><use href="#chevron"/></svg>
         </label>
+
+        <label class="field select">
+          <span>Гарантійний випадок</span>
+          <select name="warranty">
+            <option>Так</option>
+            <option>Ні</option>
+          </select>
+          <svg class="i chevron" aria-hidden="true"><use href="#chevron"/></svg>
+        </label>
+
+        <!-- Фото + плюс -->
+        <div class="photo-uploader">
+          <div class="photo-preview" id="photoPreview" aria-label="Фото причини поломки"></div>
+          <div class="photo-actions">
+            <button type="button" class="btn-square" id="addPhotoBtn" aria-label="Додати фото">
+              <svg class="i" aria-hidden="true"><use href="#plus"/></svg>
+            </button>
+            <input id="photoInput" type="file" accept="image/*" hidden />
+          </div>
+        </div>
+
+        <!-- Запчастини -->
+        <label class="field select">
+          <span>Які запчастини потрібні для ремонту ?</span>
+          <select name="part">
+            <option>ТЕН 1842</option>
+            <option>Клапан</option>
+            <option>Термодатчик</option>
+          </select>
+          <svg class="i chevron" aria-hidden="true"><use href="#chevron"/></svg>
+        </label>
+
+        <label class="field">
+          <span>Номер запчастини</span>
+          <input type="text" value="184232" name="partNo" />
+        </label>
+
+        <label class="field">
+          <span>Ціна запчастин, грн</span>
+          <input type="number" inputmode="decimal" placeholder="0,00" name="partsCost" />
+        </label>
+
+        <label class="field">
+          <span>Вартість робіт, грн</span>
+          <input type="number" inputmode="decimal" placeholder="0,00" name="worksCost" />
+        </label>
+
+        <label class="field">
+          <span>Загальна вартість, грн</span>
+          <input type="number" inputmode="decimal" placeholder="0,00" name="totalCost" />
+        </label>
+
+        <!-- Документ (рядок з PDF) -->
+        <div class="docline" aria-label="Документ">
+          
+          <img src="assets/pdf.png" alt="PDF документ" />
+          <span class="docline__title">Акт введення в експлуатацію .pdf</span>
+        </div>
 
         <div class="form__actions">
           <button class="btn primary" type="submit">Зберегти</button>
@@ -281,7 +298,7 @@
     </section>
   </template>
 
-  <!-- Создание новой -->
+  <!-- Створення нової -->
   <template id="tpl-new-ticket">
     <section class="panel">
       <a href="#" class="back" data-route="list">
@@ -336,7 +353,7 @@
     </section>
   </template>
 
-  <!-- Заглушка (не используется после обновления, можно оставить) -->
+  <!-- Заглушка (залишила) -->
   <template id="tpl-inwork">
     <section class="panel empty">
       <h2>Заявки у роботі</h2>
@@ -371,7 +388,10 @@
     }
   </script>
 
-  <!-- Inline SVG sprite (работает по file://) -->
+  <!-- Inline SVG sprite -->
+
+        <!-- Photo upload / preview -->
+        
   <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
     <symbol id="doc" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v13H6z"/><path d="M14 3v6h6"/></g></symbol>
     <symbol id="tools" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5a4 4 0 0 0 5 5l-9 9a2 2 0 0 1-3 0l-2-2a2 2 0 0 1 0-3l9-9z"/><path d="M12 7l5 5"/></g></symbol>

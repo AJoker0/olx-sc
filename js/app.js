@@ -70,6 +70,15 @@ function renderTicketsPage({ title, statusFilter, showNewButton }){
   if(titleEl) titleEl.firstChild.nodeValue = title + ' ';
   const count = getFilteredTickets({ status: statusFilter }).length;
   const chip = view.querySelector('.chip'); if(chip) chip.textContent = '+'+count;
+  // update sidebar badge to always show number of NEW ('Нова') tickets
+  const sideBtn = document.querySelector('.nav__item[data-route="list"]');
+  if(sideBtn){
+    const sideBadge = sideBtn.querySelector('.badge');
+    if(sideBadge){
+      const newCount = getFilteredTickets({ status: 'Нова' }).length;
+      sideBadge.textContent = String(newCount);
+    }
+  }
 
   // Контролы
   const searchEl = view.querySelector('#search');
@@ -265,6 +274,21 @@ function openDetail(tk, edit=false, backTo=state.route){
   view.querySelector('#s-phone').textContent   = (tk.phone||'') + (tk.person ? ', '+tk.person : '');
 
   const form = view.querySelector('#ticket-form');
+
+  // Photo picker wiring: file input, add button and preview
+  const fileInput = view.querySelector('#photoInput');
+  const addBtn = view.querySelector('#addPhotoBtn');
+  const preview = view.querySelector('#photoPreview');
+  if(addBtn && fileInput){
+    addBtn.addEventListener('click', ()=> fileInput.click());
+    fileInput.addEventListener('change', e=>{
+      const f = e.target.files?.[0];
+      if(!f) return;
+      const reader = new FileReader();
+      reader.onload = ev => { if(preview) preview.style.backgroundImage = `url(${ev.target.result})`; };
+      reader.readAsDataURL(f);
+    });
+  }
 
   // Заполнить текущими значениями (status и т.д.)
   [...form.querySelectorAll('[name]')].forEach(el=>{
