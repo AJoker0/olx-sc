@@ -22,6 +22,14 @@ body {
   --danger:#E23D3D;
   --shadow:0 2px 10px rgba(12,46,36,.06);
   --radius:14px;
+
+  /* >>> настройки “реек” и отступов <<< */
+  --sidebar-w: 260px;         /* ширина зеленого меню */
+  --shell-x: 1.25rem;         /* внутренний паддинг контейнера */
+  --rail-left: 140px;         /* ширина левой серой рейки */
+  --rail-right: 90px;         /* ширина правой серой рейки */
+  --rail-left-color:#F0F3F2;  /* цвет слева */
+  --rail-right-color:#F0F1F6; /* цвет справа */
 }
 @media (prefers-reduced-motion: reduce){
   * { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important }
@@ -39,14 +47,45 @@ body {
 .topbar{position:sticky;top:0;z-index:6;background:var(--panel);box-shadow:var(--shadow);padding:.9rem 1.25rem}
 .topbar h1{font-size:1.1rem;margin:0;color:#0D0D0D;letter-spacing:.2px}
 
-/* Desktop: даём место под фиксированный сайдбар */
+/* Desktop: место под фиксированный сайдбар и правую рейку */
 @media (min-width: 881px){
-  .app{ margin-left:260px; }
-  .topbar{ margin-left:260px; }
+  .topbar, .app{ position: relative; z-index: 1; }
+
+  /* серые рейки по краям окна */
+  body::before,
+  body::after{
+    content:"";
+    position: fixed;
+    top: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  /* левая — от самого левого края */
+  body::before{
+    left: 0;
+    width: var(--rail-left);
+    background: var(--rail-left-color);
+  }
+  /* правая — от правого края */
+  body::after{
+    right: 0;
+    width: var(--rail-right);
+    background: var(--rail-right-color);
+  }
+
+  /* сдвигаем меню вправо, чтобы слева была рейка */
+  .sidebar{ left: var(--rail-left); }
+
+  /* контент и топбар — между рейками */
+  .app{ margin-left: calc(var(--rail-left) + var(--sidebar-w)); margin-right: var(--rail-right); }
+  .topbar{ margin-left: calc(var(--rail-left) + var(--sidebar-w)); margin-right: var(--rail-right); }
+}
+@media (max-width: 880px){
+  body::before, body::after{ display:none; }
 }
 
 /* ---------- SIDEBAR ---------- */
-.sidebar{position:fixed;left:0;top:0;bottom:0;width:260px;background:#389D75;color:#fff;display:flex;flex-direction:column}
+.sidebar{position:fixed;top:0;bottom:0;width:var(--sidebar-w);background:#389D75;color:#fff;display:flex;flex-direction:column;z-index:5}
 .logo{font-weight:800;font-size:1.2rem;letter-spacing:.08em;background:#389D75;padding:1rem 1.25rem}
 .nav{display:flex;flex-direction:column;gap:.25rem;padding:.5rem;margin-top:.9rem}
 .nav__item{display:flex;align-items:center;gap:.7rem;padding:.75rem 1rem;background:transparent;border:0;color:#E9FFFA;border-radius:10px;cursor:pointer}
@@ -55,9 +94,6 @@ body {
 .nav__item:hover{background:#266A57}
 .nav__item.is-active,[aria-current="page"]{background:#156F4B}
 .nav .grow{flex:1}
-.nav__item[data-route="logout"]{background: }
-
-/* spacer used to push logout button down */
 .nav__spacer{height:76px}
 
 /* ---------- PANEL ---------- */
@@ -76,28 +112,23 @@ body {
 .search input{border:none;outline:none;background:transparent;font-size:.95rem;min-width:220px}
 .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.6rem .9rem;border-radius:10px;border:1px solid var(--border);background:#156F4B;cursor:pointer}
 .btn.icon{padding:.55rem}
-.btn.primary{background:var(--brand);color:#156F4B;border-color:var(--brand);width:100%;justify-content:center;font-size:20px;color:white;}
+.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand);width:100%;justify-content:center;font-size:20px}
 .btn.primary:hover{background:var(--brand-700)}
 .btn.ghost{background:#fff}
 .icon .i{width:18px;height:18px}
 .icon.danger .i{fill:var(--danger)}
 .link{color:#1b5a48;text-underline-offset:2px}
 
-/* stacked raster icons for nav (two images overlapped) */
+/* stacked raster icons */
 .i-stack{position:relative;display:inline-block;width:18px;height:18px}
 .i-stack img{position:absolute;inset:0;width:18px;height:18px;object-fit:contain}
-//.i-stack img:nth-child(2){transform:translate(3px,3px)}
-
-/* nav raster icon (replacement for inline svg) */
 .nav-icon{width:18px;height:18px;object-fit:contain;display:inline-block}
 
 /* ---------- TABLE ---------- */
 .table{width:100%}
 .table__head,.row{display:grid;grid-template-columns:120px 120px 220px 1fr 150px 180px 120px;gap:16px;align-items:center}
 .table__head{color:#55706A;text-transform:uppercase;font-size:.76rem;letter-spacing:.05em;border-bottom:1px solid var(--line);padding:.5rem 0}
-/* center top header labels */
 .table__head > div{ text-align:center }
-/* Card-like rows (as in mock) */
 .row{
   position:relative;
   padding:.9rem 1rem;
@@ -109,14 +140,14 @@ body {
   box-shadow: var(--shadow);
 }
 .row:hover{background:#FAFDFA}
-.row.show-actions{background:#EAF6F1} /* подсветка выбранной строки */
+.row.show-actions{background:#EAF6F1}
 .row__actions{display:flex;gap:.25rem;justify-content:flex-end}
 
 /* три точки */
 .more .dots{letter-spacing:-1px; font-weight:700; font-size:16px; line-height:1; color: #777777}
 .more{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:#fff}
 
-/* popover действий */
+/* popover */
 .actions-popover{
   position:absolute; right:6px; top:50%; transform:translateY(-50%);
   display:none; align-items:center; gap:.35rem;
@@ -124,8 +155,6 @@ body {
   box-shadow:var(--shadow);
   z-index:2;
 }
-
-/* Desktop-only card rows to match mock exactly */
 @media (min-width: 881px){
   .table__body .row{
     position:relative;
@@ -140,12 +169,7 @@ body {
 }
 .row.show-actions .actions-popover{display:flex}
 .actions-popover .icon{width:36px;height:36px;display:inline-grid;place-items:center;border-radius:10px}
-
-/* PNG action icons inside popover */
-.actions-popover .action-icon{
-  width:18px; height:18px; object-fit:contain; display:inline-block;
-  filter: none; /* keep original colors */
-}
+.actions-popover .action-icon{width:18px; height:18px; object-fit:contain; display:inline-block; filter:none;}
 .actions-popover button.icon{width:36px;height:36px;display:inline-grid;place-items:center;border-radius:10px;border:1px solid var(--border);background:#fff;padding:0}
 .actions-popover button.icon:hover{background:var(--brand-50)}
 .actions-popover button.icon:focus{outline:3px solid rgba(46,145,110,.12); outline-offset:2px}
@@ -179,8 +203,39 @@ body {
 .row-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
 .form__actions{display:flex;justify-content:flex-end;margin-top:.25rem}
 
-/* Photo preview */
-.photo-preview{width:100%;height:160px;border-radius:10px;background:#f6f7f6;background-size:cover;background-position:center;border:1px dashed var(--border);display:block}
+/* инлайн-рядок: поле + кнопка справа */
+.row-inline{
+  display:grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  align-items:end;
+}
+
+/* зеленый квадрат с плюсом */
+.btn-square{
+  width:44px; height:44px;
+  display:inline-grid; place-items:center;
+  border-radius:10px; border:1px solid var(--border);
+  background:#156F4B; cursor:pointer;
+}
+.btn-square .i{fill:#fff; width:20px; height:20px}
+
+/* “Добавить еще причину …” */
+.add-line{display:flex; align-items:center; gap:.75rem; color:#17362e; font-weight:600}
+
+/* фото: превью + кнопка справа */
+.photo-uploader{
+  display:grid; grid-template-columns: 1fr auto; gap:1rem; align-items:start;
+}
+.photo-preview{
+  width:100%; max-width:420px; height:180px;
+  border:1px solid var(--border); border-radius:12px; background:#f5faf8;
+  background-size:cover; background-position:center;
+}
+
+/* pdf-плашка */
+.docline{display:flex; align-items:center; gap:.75rem; margin-top:.25rem; justify-content:center}
+.docline__title{color:#32544B}
 
 /* ---------- TABBAR (mobile) ---------- */
 .tabbar{display:none;position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--border);padding:.4rem .6rem;gap:.5rem;justify-content:space-around;z-index:9}
@@ -210,37 +265,30 @@ body {
   .table__head,.row{grid-template-columns:100px 100px 200px 1fr 140px 1fr 120px}
   .summary__tags{grid-template-columns:1fr}
 }
-/* Narrow desktop / tablets: keep desktop grid but allow horizontal scroll to avoid overlap */
 @media (min-width: 881px) and (max-width: 1280px){
   .table{overflow-x:auto; overscroll-behavior-x:contain}
-  /* enforce a minimum content width so a scrollbar appears instead of squishing */
   .table__head, .table__body{min-width:1120px}
 }
 @media (max-width: 880px){
-  .sidebar{display:none}
-  .app{margin-left:0}
-  .topbar{margin-left:0}
+  .sidebar{left:0}
+  .app{margin-left:0; margin-right:0}
+  .topbar{margin-left:0; margin-right:0}
   .shell{padding:1rem .75rem 4.5rem}
   .panel__head{flex-direction:column;align-items:flex-start;gap:.75rem}
-  /* Mobile: hide header and legend, and show per-cell labels */
   .table{display:block}
   .table__head{display:none}
   .table__legend{display:none}
   .row{grid-template-columns:1fr;gap:.5rem;border:1px solid var(--line);padding:.9rem;border-radius:12px;margin:.4rem 0}
   .row__actions{justify-content:flex-start}
   .tabbar{display:flex}
-
-  /* Per-cell labels using data-col attr */
   .row [role="cell"]{display:grid;grid-template-columns:120px 1fr;align-items:center}
   .row [role="cell"][data-col]:before{content:attr(data-col); color:#55706A; text-transform:uppercase; font-size:.76rem; letter-spacing:.05em}
-  /* Map readable Ukrainian labels instead of raw data-col keys */
   .row [data-col="id"]:before{content:"№ заявки"}
   .row [data-col="date"]:before{content:"Дата"}
   .row [data-col="type"]:before{content:"Що зламалося"}
   .row [data-col="address"]:before{content:"Адреса"}
   .row [data-col="phone"]:before{content:"Телефон"}
   .row [data-col="person"]:before{content:"Ім'я клієнта"}
-  /* keep actions cell as flex and without label */
   .row .row__actions[role="cell"]{display:flex; grid-template-columns:initial}
   .row .row__actions[role="cell"]:before{content:none}
 }
@@ -248,45 +296,3 @@ body {
   .row-2{grid-template-columns:1fr}
   .row-3{grid-template-columns:1fr}
 }
-
-/* --- Макетні дрібниці для detail-сторінки --- */
-
-/* інлайн-рядок: поле + кнопка справа */
-.row-inline{
-  display:grid;
-  grid-template-columns: 1fr auto;
-  gap: 1rem;
-  align-items:end;
-}
-
-/* зелений квадрат з плюсом (як на макеті) */
-.btn-square{
-  width:44px; height:44px;
-  display:inline-grid; place-items:center;
-  border-radius:10px; border:1px solid var(--border);
-  background:#156F4B; cursor:pointer;
-}
-.btn-square .i{fill:#fff; width:20px; height:20px}
-
-/* рядок “Додати ще причину …” */
-.add-line{display:flex; align-items:center; gap:.75rem; color:#17362e; font-weight:600}
-
-/* завантаження фото: прев’ю + кнопка справа */
-.photo-uploader{
-  display:grid; grid-template-columns: 1fr auto; gap:1rem; align-items:start;
-}
-.photo-preview{
-  width:100%; max-width:420px; height:180px;
-  border:1px solid var(--border); border-radius:12px; background:#f5faf8;
-  background-size:cover; background-position:center;
-}
-
-/* рядок з PDF позначкою */
-.docline{display:flex; align-items:center; gap:.75rem; margin-top:.25rem; justify-content:center}
-.pdf-badge{
-  display:inline-grid; place-items:center;
-  width:42px; height:42px; border-radius:10px;
-  background:#E23D3D; color:#fff; font-weight:800;
-  letter-spacing:.02em;
-}
-.docline__title{color:#32544B}
