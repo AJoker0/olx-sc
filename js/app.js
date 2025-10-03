@@ -143,23 +143,50 @@ function renderTicketsPage({ title, statusFilter, showNewButton }){
     // клик по строке — просмотр
     row.addEventListener('click', ()=>openDetail(tk, false, state.route));
 
-    // Mobile long-press to show kebab (hide button by default in CSS)
-    // Активируется только на экранах < 881px и для touch-взаимодействий
-    let pressTimer; let longShown = false;
+    // Mobile long-press: show global action bar instead of inline kebab
+    let pressTimer; let longMode = false;
     const isMobile = () => window.matchMedia('(max-width:880px)').matches;
+    const actionbar = document.querySelector('.m-actionbar');
+    function enterActionMode(ticket){
+      if(!actionbar) return;
+      longMode = true;
+      document.body.classList.add('m-action-mode');
+      actionbar.classList.add('is-show');
+      actionbar.setAttribute('aria-hidden','false');
+      // wire buttons for this ticket
+      const closeBtn = actionbar.querySelector('.m-actionbar__close');
+      const editBtn  = actionbar.querySelector('.m-actionbar__edit');
+      const delBtn   = actionbar.querySelector('.m-actionbar__del');
+      if(closeBtn){
+        closeBtn.onclick = ()=>exitActionMode();
+      }
+      if(editBtn){
+        editBtn.onclick = ()=>{ exitActionMode(); openDetail(ticket, true, state.route); };
+      }
+      if(delBtn){
+        delBtn.onclick = ()=>{
+          if(confirm('Видалити заявку '+ticket.id+'?')){
+            const idx = state.tickets.findIndex(x=>x.id===ticket.id);
+            if(idx>-1){ state.tickets.splice(idx,1); saveState(); }
+            exitActionMode(); render(); toast('Заявку видалено');
+          }
+        };
+      }
+    }
+    function exitActionMode(){
+      longMode = false;
+      document.body.classList.remove('m-action-mode');
+      if(actionbar){ actionbar.classList.remove('is-show'); actionbar.setAttribute('aria-hidden','true'); }
+    }
     function startPress(e){
-      if(!isMobile()) return; if(e.type==='mousedown') return; // игнорируем мышь
+      if(!isMobile()) return; if(e.type==='mousedown') return;
       clearTimeout(pressTimer);
-      pressTimer = setTimeout(()=>{
-        row.classList.add('show-kebab');
-        longShown = true;
-      }, 420); // 420ms hold
+      pressTimer = setTimeout(()=>{ enterActionMode(tk); }, 420);
     }
     function cancelPress(){ clearTimeout(pressTimer); }
-    function maybeHide(){ if(!isMobile()) return; if(longShown){ setTimeout(()=>{ row.classList.remove('show-kebab'); longShown=false; }, 3000); } }
     row.addEventListener('touchstart', startPress, {passive:true});
     row.addEventListener('touchmove', cancelPress, {passive:true});
-    row.addEventListener('touchend', (e)=>{ cancelPress(); if(!longShown) { /* обычный tap уже откроет detail через click */ } else { e.preventDefault(); maybeHide(); }}, {passive:false});
+    row.addEventListener('touchend', (e)=>{ cancelPress(); }, {passive:true});
     row.addEventListener('touchcancel', cancelPress, {passive:true});
 
     // Mobile layout transformation: build stacked lines

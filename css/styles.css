@@ -50,10 +50,10 @@ body {
 
 /* Mobile profile strip */
 @media (max-width:880px){
-  .m-profile{display:flex;align-items:center;gap:.75rem;padding:.8rem 1rem .4rem}
+  .m-profile{display:flex;align-items:center;gap:.75rem;padding:.8rem 1rem .4rem;background:#389D75}
   .m-profile__avatar{width:50px;height:50px;border-radius:50%;object-fit:cover;flex:0 0 50px;display:block}
   .m-profile__name{font-weight:600;font-size:.95rem;line-height:1.2;flex:1;color:#14352D}
-  .m-profile__logout{border:1px solid var(--border);background:#fff;border-radius:10px;padding:.4rem .55rem;display:inline-grid;place-items:center;cursor:pointer}
+  .m-profile__logout{border:0px solid var(--border);background:#389d75;border-radius:10px;padding:.4rem .55rem;display:inline-grid;place-items:center;cursor:pointer}
   .m-profile__logout .i{width:20px;height:20px}
 }
 
@@ -295,6 +295,15 @@ body {
   .sidebar{left:0; display:none}
   .app{margin-left:0; margin-right:0}
   .topbar{margin-left:0; margin-right:0}
+  .m-actionbar{position:fixed;top:0;left:0;right:0;height:54px;display:flex;align-items:center;padding:0 .75rem;background:#fff;border-bottom:1px solid var(--border);z-index:20;transform:translateY(-100%);transition:transform .25s ease;gap:.75rem}
+  .m-actionbar.is-show{transform:translateY(0)}
+  .m-actionbar button{background:#fff;border:0px solid var(--border);width:42px;height:42px;border-radius:12px;display:inline-grid;place-items:center;cursor:pointer}
+  .m-actionbar__close{color:#17362e}
+  .m-actionbar__spacer{flex:1}
+  .m-actionbar-icon{width:22px;height:22px;object-fit:contain}
+  body.m-action-mode .topbar{visibility:hidden}
+  body.m-action-mode .m-profile{display:none}
+  body.m-action-mode .shell{padding-top:4.5rem}
   .shell{padding:1rem .75rem 4.5rem}
   .panel__head{flex-direction:column;align-items:flex-start;gap:.75rem}
   /* компактные теги summary */
