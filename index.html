@@ -24,29 +24,34 @@
     <div class="logo" aria-label="Лого">СЦ</div>
     <nav class="nav" role="navigation">
       <button class="nav__item is-active" data-route="list" aria-current="page">
-        <svg class="i" aria-hidden="true"><use href="#doc"/></svg>
+        <img class="nav-icon" src="assets/doc.png" alt="" aria-hidden="true" />
         <span>Нові заявки</span>
-        <span class="badge" aria-label="кількість нових">2</span>
       </button>
       <button class="nav__item" data-route="inwork">
-        <svg class="i" aria-hidden="true"><use href="#tools"/></svg>
+        <span class="i-stack" aria-hidden="true">
+          <img src="assets/Vector.png" alt="" />
+          <img src="assets/Vector(1).png" alt="" />
+        </span>
         <span>Заявки у роботі</span>
       </button>
       <button class="nav__item" data-route="archive">
-        <svg class="i" aria-hidden="true"><use href="#archive"/></svg>
+        <img class="nav-icon" src="assets/archive.png" alt="" aria-hidden="true" />
         <span>Архів заявок</span>
       </button>
       <button class="nav__item" data-route="masters">
-        <svg class="i" aria-hidden="true"><use href="#users"/></svg>
+        <img class="nav-icon" src="assets/icon.png" alt="" aria-hidden="true" />
         <span>Майстри</span>
       </button>
       <button class="nav__item" data-route="contacts">
-        <svg class="i" aria-hidden="true"><use href="#phone"/></svg>
+        <img class="nav-icon" src="assets/phone.png" alt="" aria-hidden="true" />
         <span>Контакти</span>
       </button>
       <div class="grow" aria-hidden="true"></div>
+        <!-- spacer: push the logout button two items lower -->
+        <div class="nav__spacer" aria-hidden="true"></div>
+        
       <button class="nav__item" data-route="logout">
-        <svg class="i" aria-hidden="true"><use href="#logout"/></svg>
+        <img class="nav-icon" src="assets/exit.png" alt="" aria-hidden="true" />
         <span>Вихід</span>
       </button>
     </nav>

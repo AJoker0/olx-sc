@@ -57,6 +57,9 @@ body {
 .nav .grow{flex:1}
 .nav__item[data-route="logout"]{background: }
 
+/* spacer used to push logout button down */
+.nav__spacer{height:76px}
+
 /* ---------- PANEL ---------- */
 .panel{background:var(--panel);border-radius:var(--radius);box-shadow:var(--shadow);padding:1rem}
 .panel__head{display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--line);padding:.25rem 0 1rem}
@@ -71,7 +74,7 @@ body {
 .select .chevron{position:absolute;right:.5rem;width:16px;height:16px;opacity:.75;pointer-events:none}
 .search{display:flex;align-items:center;gap:.5rem;border:1px solid var(--border);padding:.35rem .6rem;border-radius:10px;background:#D7EBE3}
 .search input{border:none;outline:none;background:transparent;font-size:.95rem;min-width:220px}
-.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.6rem .9rem;border-radius:10px;border:1px solid var(--border);background:#fff;cursor:pointer}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.6rem .9rem;border-radius:10px;border:1px solid var(--border);background:#156F4B;cursor:pointer}
 .btn.icon{padding:.55rem}
 .btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
 .btn.primary:hover{background:var(--brand-700)}
@@ -79,6 +82,14 @@ body {
 .icon .i{width:18px;height:18px}
 .icon.danger .i{fill:var(--danger)}
 .link{color:#1b5a48;text-underline-offset:2px}
+
+/* stacked raster icons for nav (two images overlapped) */
+.i-stack{position:relative;display:inline-block;width:18px;height:18px}
+.i-stack img{position:absolute;inset:0;width:18px;height:18px;object-fit:contain}
+//.i-stack img:nth-child(2){transform:translate(3px,3px)}
+
+/* nav raster icon (replacement for inline svg) */
+.nav-icon{width:18px;height:18px;object-fit:contain;display:inline-block}
 
 /* ---------- TABLE ---------- */
 .table{width:100%}
@@ -171,7 +182,7 @@ body {
 .toast.is-show{opacity:1; transform:translateX(-50%)}
 
 /* ---------- ICONS ---------- */
-.i{width:18px;height:18px;fill:#365C52}
+.i{width:18px;height:18px;fill:#365C52;}
 
 /* ---------- UTIL ---------- */
 .badge{background:var(--brand);color:#fff;border-radius:999px;padding:0 .45rem;font-weight:700}
