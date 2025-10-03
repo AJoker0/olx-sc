@@ -14,7 +14,6 @@
 
   <!-- Styles -->
   <link rel="stylesheet" href="css/styles.css" />
-  <!-- preload внешнего спрайта не нужен при inline -->
 </head>
 <body>
   <a class="skip-link" href="#app">Перейти до контенту</a>
@@ -47,9 +46,7 @@
         <span>Контакти</span>
       </button>
       <div class="grow" aria-hidden="true"></div>
-        <!-- spacer: push the logout button two items lower -->
-        <div class="nav__spacer" aria-hidden="true"></div>
-        
+      <div class="nav__spacer" aria-hidden="true"></div>
       <button class="nav__item" data-route="logout">
         <img class="nav-icon" src="assets/exit.png" alt="" aria-hidden="true" />
         <span>Вихід</span>
@@ -63,9 +60,7 @@
   </header>
 
   <!-- App root -->
-  <main id="app" class="app shell" tabindex="-1" aria-live="polite">
-    <!-- Views are injected here by app.js -->
-  </main>
+  <main id="app" class="app shell" tabindex="-1" aria-live="polite"></main>
 
   <!-- Templates -->
   <template id="tpl-list">
@@ -116,27 +111,18 @@
       <div role="cell" data-col="person">Поздняков Артем</div>
 
       <div class="row__actions" role="cell">
-        <!-- три точки -->
         <button class="icon ghost more" data-action="more" aria-haspopup="true" aria-expanded="false" title="Дії"><span class="dots" aria-hidden="true">•••</span></button>
 
-        <!-- popover с действиями -->
         <div class="actions-popover" role="menu" aria-label="Дії по заявці">
-          <!-- view (Group.png) -->
           <button class="icon ghost" data-action="view" role="menuitem" title="Переглянути">
             <img src="assets/Frame.png" alt="Переглянути" class="action-icon" />
           </button>
-
-          <!-- edit (Frame.png) -->
           <button class="icon ghost" data-action="edit" role="menuitem" title="Редагувати">
             <img src="assets/Layer 92.png" alt="Редагувати" class="action-icon" />
           </button>
-
-          <!-- delete (bin.png) -->
           <button class="icon danger ghost" data-action="del" role="menuitem" title="Видалити">
             <img src="assets/bin.png" alt="Видалити" class="action-icon" />
           </button>
-
-          <!-- close (Layer 92.png) -->
           <button class="icon ghost close" data-action="close" role="menuitem" title="Закрити">
             <img src="assets/Group.png" alt="Закрити" class="action-icon close-icon" />
           </button>
@@ -295,6 +281,7 @@
     </section>
   </template>
 
+  <!-- Создание новой -->
   <template id="tpl-new-ticket">
     <section class="panel">
       <a href="#" class="back" data-route="list">
@@ -349,6 +336,7 @@
     </section>
   </template>
 
+  <!-- Заглушка (не используется после обновления, можно оставить) -->
   <template id="tpl-inwork">
     <section class="panel empty">
       <h2>Заявки у роботі</h2>
@@ -376,7 +364,6 @@
 
   <script src="js/app.js" defer></script>
   <script>
-    // SW регистрируем только по http/https, чтобы не мешал при file://
     if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(()=>{});
@@ -386,118 +373,20 @@
 
   <!-- Inline SVG sprite (работает по file://) -->
   <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
-    <!-- Документ -->
-    <symbol id="doc" viewBox="0 0 24 24">
-      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M6 3h8l5 5v13H6z"/>
-        <path d="M14 3v6h6"/>
-      </g>
-    </symbol>
-
-    <!-- Инструменты -->
-    <symbol id="tools" viewBox="0 0 24 24">
-      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M14.5 5a4 4 0 0 0 5 5l-9 9a2 2 0 0 1-3 0l-2-2a2 2 0 0 1 0-3l9-9z"/>
-        <path d="M12 7l5 5"/>
-      </g>
-    </symbol>
-
-    <!-- Архив/ящик -->
-    <symbol id="archive" viewBox="0 0 24 24">
-      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="4" width="18" height="4" rx="1"/>
-        <path d="M5 8h14v9a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/>
-        <path d="M9 12h6"/>
-      </g>
-    </symbol>
-
-    <!-- Пользователи -->
-    <symbol id="users" viewBox="0 0 24 24">
-      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="9" cy="8" r="3"/>
-        <path d="M4 19a5 5 0 0 1 10 0"/>
-        <circle cx="17" cy="10" r="2"/>
-        <path d="M14.5 19a4.5 4.5 0 0 1 5.5 0"/>
-      </g>
-    </symbol>
-
-    <!-- Телефон -->
-    <symbol id="phone" viewBox="0 0 24 24">
-      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M22 16.92v2a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07A19.5 19.5 0 0 1 3.15 9.81 19.86 19.86 0 0 1 .08 1.18 2 2 0 0 1 2.06 0h2a2 2 0 0 1 2 1.72 12.66 12.66 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L5.4 8.1a16 16 0 0 0 6.5 6.5l1.46-1.91a2 2 0 0 1 2.11-.45 12.66 12.66 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-      </g>
-    </symbol>
-
-    <!-- Выход -->
-    <symbol id="logout" viewBox="0 0 24 24">
-      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-        <path d="M16 17l5-5-5-5"/>
-        <path d="M21 12H9"/>
-      </g>
-    </symbol>
-
-    <!-- Пользователь -->
-    <symbol id="user" viewBox="0 0 24 24">
-      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="7" r="4"/>
-        <path d="M5.5 21a7.5 7.5 0 0 1 13 0"/>
-      </g>
-    </symbol>
-
-    <!-- Лупа -->
-    <symbol id="search" viewBox="0 0 24 24">
-      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="7"/>
-        <path d="M21 21l-4.3-4.3"/>
-      </g>
-    </symbol>
-
-    <!-- Плюс -->
-    <symbol id="plus" viewBox="0 0 24 24">
-      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-        <path d="M12 5v14M5 12h14"/>
-      </g>
-    </symbol>
-
-    <!-- Глаз -->
-    <symbol id="eye" viewBox="0 0 24 24">
-      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
-        <circle cx="12" cy="12" r="3"/>
-      </g>
-    </symbol>
-
-    <!-- Карандаш -->
-    <symbol id="edit" viewBox="0 0 24 24">
-      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 20h9"/>
-        <path d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z"/>
-      </g>
-    </symbol>
-
-    <!-- Мусорка -->
-    <symbol id="trash" viewBox="0 0 24 24">
-      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 6h18"/>
-        <path d="M8 6v-2a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-        <path d="M10 11v6M14 11v6"/>
-      </g>
-    </symbol>
-
-    <!-- Стрелка влево -->
-    <symbol id="arrow-left" viewBox="0 0 24 24">
-      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M19 12H5"/>
-        <path d="M12 19l-7-7 7-7"/>
-      </g>
-    </symbol>
-
-    <!-- Чеврон вниз -->
-    <symbol id="chevron" viewBox="0 0 24 24">
-      <polyline points="6 9 12 15 18 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    </symbol>
+    <symbol id="doc" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v13H6z"/><path d="M14 3v6h6"/></g></symbol>
+    <symbol id="tools" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5a4 4 0 0 0 5 5l-9 9a2 2 0 0 1-3 0l-2-2a2 2 0 0 1 0-3l9-9z"/><path d="M12 7l5 5"/></g></symbol>
+    <symbol id="archive" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8h14v9a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M9 12h6"/></g></symbol>
+    <symbol id="users" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M4 19a5 5 0 0 1 10 0"/><circle cx="17" cy="10" r="2"/><path d="M14.5 19a4.5 4.5 0 0 1 5.5 0"/></g></symbol>
+    <symbol id="phone" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v2a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07A19.5 19.5 0 0 1 3.15 9.81 19.86 19.86 0 0 1 .08 1.18 2 2 0 0 1 2.06 0h2a2 2 0 0 1 2 1.72 12.66 12.66 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L5.4 8.1a16 16 0 0 0 6.5 6.5l1.46-1.91a2 2 0 0 1 2.11-.45 12.66 12.66 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></g></symbol>
+    <symbol id="logout" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></g></symbol>
+    <symbol id="user" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a7.5 7.5 0 0 1 13 0"/></g></symbol>
+    <symbol id="search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></g></symbol>
+    <symbol id="plus" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></g></symbol>
+    <symbol id="eye" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></g></symbol>
+    <symbol id="edit" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z"/></g></symbol>
+    <symbol id="trash" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6v-2a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></g></symbol>
+    <symbol id="arrow-left" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></g></symbol>
+    <symbol id="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   </svg>
 </body>
 </html>

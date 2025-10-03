@@ -1,41 +1,42 @@
-/* Tiny SPA Router + improved interactions, search, filter + kebab actions */
-const $ = (sel, ctx=document) => ctx.querySelector(sel);
+/* Tiny SPA with: list + inwork + archive, autosave, kebab actions, localStorage */
+const $  = (sel, ctx=document) => ctx.querySelector(sel);
 const $$ = (sel, ctx=document) => [...ctx.querySelectorAll(sel)];
 
 const state = {
   route: 'list',
   tickets: [
-    { id:'63 753', date:'19.01.25', type:'Газовий котел', address:'Вул. Чорноморського Козацтва, 806', phone:'096 145 85 54', person:'Поздняков Артем' },
-    { id:'63 754', date:'19.01.25', type:'Бойлер',         address:'Вул. Чорноморського Козацтва, 806', phone:'096 145 85 54', person:'Поздняков Артем' },
-    { id:'63 755', date:'19.01.25', type:'Газовий котел',  address:'Вул. Чорноморського Козацтва, 806', phone:'096 145 85 54', person:'Поздняков Артем' },
+    { id:'63 753', date:'19.01.25', type:'Газовий котел', address:'Вул. Чорноморського Козацтва, 806', phone:'096 145 85 54', person:'Поздняков Артем', status:'Нова' },
+    { id:'63 754', date:'19.01.25', type:'Бойлер',         address:'Вул. Чорноморського Козацтва, 806', phone:'096 145 85 54', person:'Поздняков Артем', status:'Нова' },
+    { id:'63 755', date:'19.01.25', type:'Газовий котел',  address:'Вул. Чорноморського Козацтва, 806', phone:'096 145 85 54', person:'Поздняков Артем', status:'Нова' },
   ],
   ui: { search:'', filter:'all' }
 };
 
-// Persistence helpers (localStorage)
+// Persistence
 const STORAGE_KEY = 'olx-sc-state';
-function saveState(){
-  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify({ tickets: state.tickets })); }catch(e){}
-}
+function saveState(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify({ tickets: state.tickets })); }catch{} }
 function loadState(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
     if(!raw) return;
     const parsed = JSON.parse(raw);
     if(parsed && Array.isArray(parsed.tickets)) state.tickets = parsed.tickets;
-  }catch(e){}
+  }catch{}
 }
+// normalize existing items (ensure .status)
+function normalizeTickets(){ state.tickets = state.tickets.map(t => ({...t, status: t.status || 'Нова'})); }
 
-// load persisted state on script init
+// init
 loadState();
+normalizeTickets();
 
-function navigate(route) {
+/* Router */
+function navigate(route){
   state.route = route;
   window.history.replaceState({}, '', '#'+route);
   render();
   highlightNav(route);
 }
-
 function highlightNav(route){
   $$('.nav__item').forEach(b=>{
     const on = b.dataset.route===route;
@@ -45,115 +46,139 @@ function highlightNav(route){
   $$('.tab').forEach(b=>b.classList.toggle('is-active', b.dataset.route===route));
 }
 
+/* Render helpers */
+function getFilteredTickets({ status } = {}){
+  const q = state.ui.search;
+  const f = state.ui.filter;
+  return state.tickets.filter(tk=>{
+    const byStatus = status ? (tk.status === status) : true;
+    const byType   = (f==='all') || (tk.type === f);
+    const blob     = `${tk.id} ${tk.date} ${tk.type} ${tk.address} ${tk.phone} ${tk.person}`.toLowerCase();
+    const bySearch = !q || blob.includes(q);
+    return byStatus && byType && bySearch;
+  });
+}
+
+function renderTicketsPage({ title, statusFilter, showNewButton }){
+  const app = $('#app');
+  const t = (id)=>document.querySelector(`#${id}`).content.cloneNode(true);
+  const view = t('tpl-list');
+  const body = view.querySelector('#rows');
+
+  // Заголовок и счетчик
+  const titleEl = view.querySelector('#l-title');
+  if(titleEl) titleEl.firstChild.nodeValue = title + ' ';
+  const count = getFilteredTickets({ status: statusFilter }).length;
+  const chip = view.querySelector('.chip'); if(chip) chip.textContent = '+'+count;
+
+  // Контролы
+  const searchEl = view.querySelector('#search');
+  const filterEl = view.querySelector('#filter-device');
+  searchEl.value = state.ui.search;
+  filterEl.value = state.ui.filter;
+
+  const list = getFilteredTickets({ status: statusFilter });
+  list.forEach((tk)=>{
+    const r   = t('tpl-row');
+    const row = r.querySelector('.row');
+    const c   = row.children;
+
+    c[0].textContent = tk.id;
+    c[1].textContent = tk.date;
+    c[2].querySelector('[data-kind="type"]').textContent = tk.type;
+    c[3].textContent = tk.address || '—';
+    c[4].innerHTML   = `<a class="link" href="tel:+380961458554">${tk.phone || '—'}</a>`;
+    c[5].textContent = tk.person || '—';
+
+    // три точки
+    row.querySelector('[data-action="more"]').addEventListener('click', (e)=>{
+      e.stopPropagation(); toggleRowMenu(row, null);
+    });
+
+    // view
+    row.querySelector('[data-action="view"]').addEventListener('click', (e)=>{
+      e.stopPropagation(); closeAllMenus(); openDetail(tk, false, state.route);
+    });
+
+    // edit
+    row.querySelector('[data-action="edit"]').addEventListener('click', (e)=>{
+      e.stopPropagation(); closeAllMenus();
+      // если мы редактируем из "Нові заявки", то переносим пользователя на маршрут #inwork,
+      // но статус НЕ меняем автоматически — он поменяется в форме, если пользователь так выберет.
+      if(state.route === 'list'){
+        state.route = 'inwork';
+        window.history.replaceState({}, '', '#inwork');
+        openDetail(tk, true, 'inwork');
+      } else {
+        openDetail(tk, true, state.route);
+      }
+    });
+
+    // delete
+    row.querySelector('[data-action="del"]').addEventListener('click', (e)=>{
+      e.stopPropagation();
+      if(confirm('Видалити заявку '+tk.id+'?')){
+        const idx = state.tickets.findIndex(x=>x.id===tk.id);
+        state.tickets.splice(idx,1);
+        saveState();
+        render();
+        toast('Заявку видалено');
+      }
+    });
+
+    // закрыть поповер
+    row.querySelector('[data-action="close"]').addEventListener('click', (e)=>{
+      e.stopPropagation(); toggleRowMenu(row, false);
+    });
+
+    // клик по строке — просмотр
+    row.addEventListener('click', ()=>openDetail(tk, false, state.route));
+    body.appendChild(r);
+  });
+
+  // события поиска/фильтра
+  searchEl.addEventListener('input', (e)=>{ state.ui.search = e.target.value.trim().toLowerCase(); render(); });
+  filterEl.addEventListener('change', (e)=>{ state.ui.filter = e.target.value; render(); });
+
+  // кнопка "Нова заявка"
+  const newBtn = view.querySelector('.btn.icon[title="Нова заявка"]');
+  if(newBtn) newBtn.style.display = showNewButton ? '' : 'none';
+  if(showNewButton) newBtn.addEventListener('click', createNewTicket);
+
+  app.appendChild(view);
+}
+
 function render(){
   const app = $('#app');
-  // preserve focused input (id and caret) so fast re-renders (e.g. on search input)
+
+  // сохранить фокус (чтобы поиск не терял каретку)
   const prevActive = document.activeElement;
-  const preserve = (prevActive && prevActive.id && (prevActive.tagName==='INPUT' || prevActive.tagName==='TEXTAREA' || prevActive.tagName==='SELECT'))
-    ? { id: prevActive.id, start: prevActive.selectionStart, end: prevActive.selectionEnd }
-    : null;
+  const preserve = (prevActive && prevActive.id &&
+    (prevActive.tagName==='INPUT'||prevActive.tagName==='TEXTAREA'||prevActive.tagName==='SELECT'))
+    ? { id: prevActive.id, start: prevActive.selectionStart, end: prevActive.selectionEnd } : null;
 
   app.innerHTML = '';
-  const t = (id)=>document.querySelector(`#${id}`).content.cloneNode(true);
 
-  if(state.route==='list'){
-    const view = t('tpl-list');
-    const body = view.querySelector('#rows');
-
-    // controls
-    const searchEl = view.querySelector('#search');
-    const filterEl = view.querySelector('#filter-device');
-    searchEl.value = state.ui.search;
-    filterEl.value = state.ui.filter;
-
-    const list = getFilteredTickets();
-    list.forEach((tk)=>{
-      const r = t('tpl-row');
-      const row = r.querySelector('.row');
-      const cells = row.children;
-
-      cells[0].textContent = tk.id;
-      cells[1].textContent = tk.date;
-      cells[2].querySelector('[data-kind="type"]').textContent = tk.type;
-      cells[3].textContent = tk.address;
-      cells[4].innerHTML = `<a class="link" href="tel:+380961458554">${tk.phone}</a>`;
-      cells[5].textContent = tk.person;
-
-      // menu: три точки
-      const moreBtn = row.querySelector('[data-action="more"]');
-      moreBtn.addEventListener('click', (e)=>{
-        e.stopPropagation();
-        // toggle open/close on repeated clicks
-        toggleRowMenu(row, null);
-      });
-
-      // actions inside popover
-      row.querySelector('[data-action="view"]').addEventListener('click', (e)=>{ 
-        e.stopPropagation(); closeAllMenus(); openDetail(tk); 
-      });
-      row.querySelector('[data-action="edit"]').addEventListener('click', (e)=>{ 
-        e.stopPropagation(); closeAllMenus(); openDetail(tk, true); 
-      });
-      row.querySelector('[data-action="del"]').addEventListener('click', (e)=>{
-        e.stopPropagation();
-        if(confirm('Видалити заявку '+tk.id+'?')){
-          const idxInState = state.tickets.findIndex(x=>x.id===tk.id);
-          state.tickets.splice(idxInState,1);
-          saveState();
-          render();
-          toast('Заявку видалено');
-        }
-      });
-      row.querySelector('[data-action="close"]').addEventListener('click', (e)=>{
-        e.stopPropagation(); toggleRowMenu(row, false);
-      });
-
-      // click row -> open detail
-      row.addEventListener('click', ()=>openDetail(tk));
-      body.appendChild(r);
-    });
-
-    // events: поиск/фильтр
-    searchEl.addEventListener('input', (e)=>{
-      state.ui.search = e.target.value.trim().toLowerCase();
-      render();
-    });
-    filterEl.addEventListener('change', (e)=>{
-      state.ui.filter = e.target.value;
-      render();
-    });
-
-    // "Нова заявка"
-    view.querySelector('.btn.icon[title="Нова заявка"]').addEventListener('click', createNewTicket);
-
-    app.appendChild(view);
-  }
-  else if(state.route==='inwork'){
-    app.appendChild(t('tpl-inwork'));
-  }
-  else {
+  if(state.route === 'list'){
+    renderTicketsPage({ title: 'Нові заявки', statusFilter: 'Нова', showNewButton: true });
+  } else if(state.route === 'inwork'){
+    renderTicketsPage({ title: 'Заявки у роботі', statusFilter: 'У роботі', showNewButton: false });
+  } else if(state.route === 'archive'){
+    renderTicketsPage({ title: 'Архів заявок', statusFilter: 'Виконана', showNewButton: false });
+  } else {
     app.innerHTML = '<section class="panel empty"><p>Сторінка у розробці.</p></section>';
   }
 
-  // restore focus if user was typing in an input (search); otherwise focus main for a11y
+  // восстановить фокус
   if(preserve){
-    // try to find the new element with same id inside the freshly rendered app
     const restored = document.getElementById(preserve.id) || app.querySelector('#'+preserve.id);
     if(restored){
-      try{ restored.focus();
-        if(typeof preserve.start === 'number' && typeof restored.setSelectionRange === 'function'){
-          restored.setSelectionRange(preserve.start, preserve.end || preserve.start);
-        }
-      }catch(e){ /* ignore focus errors */ }
-    } else {
-      app.focus();
-    }
-  } else {
-    app.focus();
-  }
+      try{ restored.focus(); if(typeof preserve.start==='number' && restored.setSelectionRange){ restored.setSelectionRange(preserve.start, preserve.end||preserve.start); } }catch{}
+    } else { app.focus(); }
+  } else { app.focus(); }
 }
 
-/* helpers for menu */
+/* Popover helpers */
 function toggleRowMenu(row, forceOpen=null){
   const open = forceOpen===null ? !row.classList.contains('show-actions') : forceOpen;
   closeAllMenus();
@@ -177,17 +202,7 @@ document.addEventListener('keydown', (e)=>{
   if(e.key==='Escape') closeAllMenus();
 });
 
-function getFilteredTickets(){
-  const q = state.ui.search;
-  const f = state.ui.filter;
-  return state.tickets.filter(tk=>{
-    const matchFilter = (f==='all') || (tk.type === f);
-    const blob = `${tk.id} ${tk.date} ${tk.type} ${tk.address} ${tk.phone} ${tk.person}`.toLowerCase();
-    const matchSearch = !q || blob.includes(q);
-    return matchFilter && matchSearch;
-  });
-}
-
+/* New ticket */
 function createNewTicket(){
   const newId = generateTicketId();
   const newTicket = {
@@ -196,16 +211,15 @@ function createNewTicket(){
     type: 'Газовий котел',
     address: '',
     phone: '',
-    person: ''
+    person: '',
+    status: 'Нова'
   };
   openNewTicketForm(newTicket);
 }
-
 function generateTicketId(){
   const lastId = Math.max(...state.tickets.map(t => parseInt(t.id.replace(' ', ''))));
   return (lastId + 1).toString().replace(/(\d{2})(\d{3})/, '$1 $2');
 }
-
 function openNewTicketForm(tk){
   const app = $('#app');
   app.innerHTML = '';
@@ -218,14 +232,15 @@ function openNewTicketForm(tk){
 
   view.querySelector('#new-ticket-form').addEventListener('submit', (e)=>{
     e.preventDefault();
-    const formData = new FormData(e.target);
+    const fd = new FormData(e.target);
     const newTicket = {
       id: tk.id,
       date: tk.date,
-      type: formData.get('device') || 'Газовий котел',
-      address: formData.get('address') || 'Не вказано',
-      phone: formData.get('phone') || 'Не вказано',
-      person: formData.get('client') || 'Не вказано'
+      type: fd.get('device') || 'Газовий котел',
+      address: fd.get('address') || 'Не вказано',
+      phone: fd.get('phone') || 'Не вказано',
+      person: fd.get('client') || 'Не вказано',
+      status: 'Нова'
     };
     state.tickets.unshift(newTicket);
     saveState();
@@ -237,86 +252,75 @@ function openNewTicketForm(tk){
   highlightNav(null);
 }
 
-function openDetail(tk, edit=false){
+/* Detail */
+function openDetail(tk, edit=false, backTo=state.route){
   closeAllMenus();
-  const app = $('#app');
+  const app  = $('#app');
   app.innerHTML = '';
   const view = document.querySelector('#tpl-detail').content.cloneNode(true);
+
   view.querySelector('#ticket-id').textContent = tk.id;
-  view.querySelector('#s-what').textContent = tk.type.includes('котел') ? 'Газовий котел' : 'Бойлер';
-  view.querySelector('#s-address').textContent = 'Одеса, ' + tk.address;
-  view.querySelector('#s-phone').textContent = tk.phone + ', ' + tk.person;
+  view.querySelector('#s-what').textContent   = tk.type.includes('котел') ? 'Газовий котел' : 'Бойлер';
+  view.querySelector('#s-address').textContent = (tk.address ? 'Одеса, '+tk.address : '');
+  view.querySelector('#s-phone').textContent   = (tk.phone||'') + (tk.person ? ', '+tk.person : '');
 
-  // populate form fields from existing ticket values (so selects/inputs show current state)
   const form = view.querySelector('#ticket-form');
-  if(form){
-    const fields = [...form.querySelectorAll('[name]')];
-    fields.forEach(el=>{
-      const name = el.name;
-      if(!name) return;
-      // skip file inputs
-      if(el.type === 'file') return;
-      const val = tk[name];
-      if(val === undefined || val === null) return;
-      try{
-        if(el.tagName === 'SELECT' || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA'){
-          // set value as string; for numbers/dates keep as-is
-          el.value = String(val);
-        }
-      }catch(e){/* ignore */}
-    });
-  }
 
-  view.querySelector('[data-route="list"]').addEventListener('click', (e)=>{
-    e.preventDefault(); navigate('list');
+  // Заполнить текущими значениями (status и т.д.)
+  [...form.querySelectorAll('[name]')].forEach(el=>{
+    const name = el.name;
+    if(!name || el.type === 'file') return;
+    const val = tk[name];
+    if(val === undefined || val === null) return;
+    try{ el.value = String(val); }catch{}
   });
-  // 'form' was already queried above for population. Reuse that variable here.
 
-  // debounce helper
-  function debounce(fn, wait=400){
-    let t;
-    return (...a)=>{ clearTimeout(t); t = setTimeout(()=>fn(...a), wait); };
-  }
+  // Назад
+  view.querySelector('[data-route="list"]').addEventListener('click', (e)=>{
+    e.preventDefault(); navigate(backTo || 'list');
+  });
 
-  // autosave function: merge form values into ticket and persist
+  // debounce
+  const debounce = (fn, wait=400)=>{ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), wait); }; };
+
+  // autosave
   const autosave = debounce(()=>{
     const fd = new FormData(form);
-    const updated = Object.assign({}, tk);
+    const updated = { ...tk };
     for(const [key, val] of fd.entries()){
       if(['partsCost','worksCost','totalCost'].includes(key)){
-        const n = parseFloat(val);
-        updated[key] = Number.isFinite(n) ? n : 0;
+        const n = parseFloat(val); updated[key] = Number.isFinite(n) ? n : 0;
       } else {
         updated[key] = val;
       }
     }
     const idx = state.tickets.findIndex(x=>x.id===tk.id);
-    if(idx>-1){ state.tickets[idx] = updated; saveState(); }
-    // update small summary fields live
-    const sumWhat = view.querySelector('#s-what');
-    const sumAddress = view.querySelector('#s-address');
-    const sumPhone = view.querySelector('#s-phone');
-    if(sumWhat) sumWhat.textContent = updated.part || updated.type || '';
-    if(sumAddress) sumAddress.textContent = updated.address || '';
-    if(sumPhone) sumPhone.textContent = (updated.phone || '') + (updated.person ? ', ' + updated.person : '');
-  }, 400);
+    if(idx>-1){ state.tickets[idx] = updated; saveState(); tk = updated; }
+    // апдейт мини-резюме
+    const sumWhat   = view.querySelector('#s-what');
+    const sumAddr   = view.querySelector('#s-address');
+    const sumPhone  = view.querySelector('#s-phone');
+    if(sumWhat)  sumWhat.textContent  = updated.type || '';
+    if(sumAddr)  sumAddr.textContent  = updated.address ? 'Одеса, '+updated.address : '';
+    if(sumPhone) sumPhone.textContent = (updated.phone||'') + (updated.person ? ', '+updated.person : '');
+  }, 350);
 
-  // listen for input/change to autosave
-  form.addEventListener('input', autosave);
+  form.addEventListener('input',  autosave);
   form.addEventListener('change', autosave);
 
-  // explicit save on submit as well
   form.addEventListener('submit', (e)=>{
     e.preventDefault();
     autosave();
     toast('Збережено ✔');
-    navigate('list');
+    // возвращаемся туда, откуда пришли (в т.ч. в "Заявки у роботі")
+    navigate(backTo || 'list');
   });
 
   app.appendChild(view);
   highlightNav(null);
 }
 
+/* Toast */
 function toast(msg){
   const t = $('#toast');
   t.textContent = msg;
@@ -326,11 +330,8 @@ function toast(msg){
 
 /* Router mounts */
 document.addEventListener('click', (e)=>{
-  const routeEl = e.target.closest('[data-route]');
-  if(routeEl){
-    e.preventDefault();
-    navigate(routeEl.dataset.route);
-  }
+  const r = e.target.closest('[data-route]');
+  if(r){ e.preventDefault(); navigate(r.dataset.route); }
 });
 window.addEventListener('hashchange', ()=>{
   const r = location.hash.replace('#','') || 'list';
