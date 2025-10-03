@@ -247,25 +247,68 @@ function openDetail(tk, edit=false){
   view.querySelector('#s-address').textContent = 'Одеса, ' + tk.address;
   view.querySelector('#s-phone').textContent = tk.phone + ', ' + tk.person;
 
+  // populate form fields from existing ticket values (so selects/inputs show current state)
+  const form = view.querySelector('#ticket-form');
+  if(form){
+    const fields = [...form.querySelectorAll('[name]')];
+    fields.forEach(el=>{
+      const name = el.name;
+      if(!name) return;
+      // skip file inputs
+      if(el.type === 'file') return;
+      const val = tk[name];
+      if(val === undefined || val === null) return;
+      try{
+        if(el.tagName === 'SELECT' || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA'){
+          // set value as string; for numbers/dates keep as-is
+          el.value = String(val);
+        }
+      }catch(e){/* ignore */}
+    });
+  }
+
   view.querySelector('[data-route="list"]').addEventListener('click', (e)=>{
     e.preventDefault(); navigate('list');
   });
+  // 'form' was already queried above for population. Reuse that variable here.
 
-  view.querySelector('#ticket-form').addEventListener('submit', (e)=>{
-    e.preventDefault();
-    // collect values and persist changes back to state
-    const form = e.target;
+  // debounce helper
+  function debounce(fn, wait=400){
+    let t;
+    return (...a)=>{ clearTimeout(t); t = setTimeout(()=>fn(...a), wait); };
+  }
+
+  // autosave function: merge form values into ticket and persist
+  const autosave = debounce(()=>{
     const fd = new FormData(form);
-    const updated = {
-      id: tk.id,
-      date: fd.get('date') || tk.date,
-      type: fd.get('device') || tk.type,
-      address: fd.get('address') || tk.address,
-      phone: fd.get('phone') || tk.phone,
-      person: fd.get('client') || tk.person
-    };
+    const updated = Object.assign({}, tk);
+    for(const [key, val] of fd.entries()){
+      if(['partsCost','worksCost','totalCost'].includes(key)){
+        const n = parseFloat(val);
+        updated[key] = Number.isFinite(n) ? n : 0;
+      } else {
+        updated[key] = val;
+      }
+    }
     const idx = state.tickets.findIndex(x=>x.id===tk.id);
     if(idx>-1){ state.tickets[idx] = updated; saveState(); }
+    // update small summary fields live
+    const sumWhat = view.querySelector('#s-what');
+    const sumAddress = view.querySelector('#s-address');
+    const sumPhone = view.querySelector('#s-phone');
+    if(sumWhat) sumWhat.textContent = updated.part || updated.type || '';
+    if(sumAddress) sumAddress.textContent = updated.address || '';
+    if(sumPhone) sumPhone.textContent = (updated.phone || '') + (updated.person ? ', ' + updated.person : '');
+  }, 400);
+
+  // listen for input/change to autosave
+  form.addEventListener('input', autosave);
+  form.addEventListener('change', autosave);
+
+  // explicit save on submit as well
+  form.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    autosave();
     toast('Збережено ✔');
     navigate('list');
   });
